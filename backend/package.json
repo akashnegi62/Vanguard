@@ -13,11 +13,19 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "test": "jest --runInBand --detectOpenHandles --no-watchman"
   },
-  "keywords": ["ecommerce", "mens-fashion", "express", "postgresql", "prisma", "rest-api"],
+  "keywords": [
+    "ecommerce",
+    "mens-fashion",
+    "express",
+    "postgresql",
+    "prisma",
+    "rest-api"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@supabase/supabase-js": "^2.117.3",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
