@@ -27,16 +27,34 @@ export default function AdminUsersPage() {
       });
   }, []);
 
-  const handleToggleStatus = (id: string) => {
-    setUsers(
-      users.map((u) => (u.id === id ? { ...u, isActive: !u.isActive } : u))
-    );
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      await api.updateUserStatus(id, !currentStatus);
+      setUsers(
+        users.map((u) => (u.id === id ? { ...u, isActive: !currentStatus } : u))
+      );
+      setFeedback({ type: 'success', message: 'User account status updated successfully.' });
+      setTimeout(() => setFeedback(null), 3000);
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message || 'Failed to update user status.' });
+      setTimeout(() => setFeedback(null), 3000);
+    }
   };
 
-  const handleRoleChange = (id: string, newRole: UserRole) => {
-    setUsers(
-      users.map((u) => (u.id === id ? { ...u, role: newRole } : u))
-    );
+  const handleRoleChange = async (id: string, newRole: UserRole) => {
+    try {
+      await api.updateUserRole(id, newRole);
+      setUsers(
+        users.map((u) => (u.id === id ? { ...u, role: newRole } : u))
+      );
+      setFeedback({ type: 'success', message: `User role updated to ${newRole}.` });
+      setTimeout(() => setFeedback(null), 3000);
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message || 'Failed to change user role.' });
+      setTimeout(() => setFeedback(null), 3000);
+    }
   };
 
   const filtered = users.filter(
@@ -56,6 +74,19 @@ export default function AdminUsersPage() {
         />
 
         <main className="flex-1 p-8 space-y-6 overflow-y-auto">
+          {feedback && (
+            <div
+              className={`p-3.5 rounded-xl border flex items-center gap-2 text-xs font-semibold ${
+                feedback.type === 'success'
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{feedback.message}</span>
+            </div>
+          )}
+
           <div className="relative max-w-md w-full">
             <input
               type="text"
@@ -123,7 +154,7 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <button
-                        onClick={() => handleToggleStatus(usr.id)}
+                        onClick={() => handleToggleStatus(usr.id, usr.isActive)}
                         className={`text-xs px-3 py-1 rounded-lg border font-semibold transition-colors ${
                           usr.isActive
                             ? 'border-red-200 text-red-600 hover:bg-red-50'

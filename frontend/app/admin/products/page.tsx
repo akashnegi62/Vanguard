@@ -34,21 +34,50 @@ export default function AdminProductsPage() {
       });
   };
 
+  const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
+
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you wish to delete this garment from the active catalog?')) {
-      try {
-        await api.deleteProduct(id);
-      } catch (e) {
-        console.warn('Delete product API:', e);
+    if (!confirm('Are you sure you wish to delete this garment from the active catalog?')) {
+      return;
+    }
+
+    setDeleteLoadingId(id);
+    try {
+      const res = await api.deleteProduct(id);
+      if (res && (res.success || !res.error)) {
+        setProducts((prev) => prev.filter((p) => p.id !== id));
+      } else {
+        alert(res?.message || 'Failed to delete product from database');
       }
-      setProducts(products.filter((p) => p.id !== id));
+    } catch (e: any) {
+      console.error('Delete product API error:', e);
+      // Still remove locally if server reported success or update list
+      alert(e?.message || 'Error communicating with server during deletion');
+      loadProducts();
+    } finally {
+      setDeleteLoadingId(null);
     }
   };
 
-  const handleToggleActive = (id: string) => {
-    setProducts(
-      products.map((p) => (p.id === id ? { ...p, isActive: !p.isActive } : p))
+  const handleToggleActive = async (id: string) => {
+    const target = products.find((p) => p.id === id);
+    if (!target) return;
+    const newStatus = !target.isActive;
+
+    // Optimistically update
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, isActive: newStatus } : p))
     );
+
+    try {
+      await api.updateProduct(id, { isActive: newStatus });
+    } catch (err: any) {
+      console.error('Failed to update product status:', err);
+      // Revert if error
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, isActive: target.isActive } : p))
+      );
+    }
   };
 
   const filtered = products.filter(
@@ -201,10 +230,13 @@ export default function AdminProductsPage() {
                               </Link>
                               <button
                                 onClick={() => handleDelete(product.id)}
-                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors border border-slate-200"
+                                disabled={deleteLoadingId === product.id}
+                                className={`p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors border border-slate-200 ${
+                                  deleteLoadingId === product.id ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
                                 title="Delete"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Trash2 className={`w-3.5 h-3.5 ${deleteLoadingId === product.id ? 'animate-pulse' : ''}`} />
                               </button>
                             </div>
                           </td>

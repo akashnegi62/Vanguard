@@ -6,11 +6,11 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuthStore } from '@/store/authStore';
-import { Lock, Mail, ArrowRight, ShieldCheck, UserCheck } from 'lucide-react';
+import { Lock, Mail, ArrowRight, UserCheck } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, quickLoginAsUser, quickLoginAsAdmin, isLoading, error } = useAuthStore();
+  const { login, quickLoginAsUser, isLoading, error } = useAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,23 +21,13 @@ export default function LoginPage() {
     setLocalError(null);
     const success = await login(email, password);
     if (success) {
-      const currentUser = useAuthStore.getState().user;
-      if (currentUser?.role === 'ADMIN') {
-        router.push('/admin');
-      } else {
-        router.push('/');
-      }
+      router.push('/');
     }
   };
 
   const handleDemoUser = () => {
     quickLoginAsUser();
     router.push('/');
-  };
-
-  const handleDemoAdmin = () => {
-    quickLoginAsAdmin();
-    router.push('/admin');
   };
 
   return (
@@ -61,27 +51,19 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Quick Demo Fill Buttons */}
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 block text-center">
-              Evaluation & Demo Instant Logins
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={handleDemoUser}
-                className="py-2 px-3 rounded-lg bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors border border-slate-200 shadow-2xs"
-              >
-                <UserCheck className="w-3.5 h-3.5 text-slate-700" /> Customer
-              </button>
-              <button
-                type="button"
-                onClick={handleDemoAdmin}
-                className="py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-white" /> Admin
-              </button>
+          {/* Quick Demo Customer Sign In */}
+          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-900">Testing as a customer?</p>
+              <p className="text-[11px] text-slate-500">Vikram Mehta (user@example.com)</p>
             </div>
+            <button
+              type="button"
+              onClick={handleDemoUser}
+              className="py-1.5 px-3 rounded-xl bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold flex items-center gap-1.5 transition-colors border border-slate-300 shadow-2xs"
+            >
+              <UserCheck className="w-3.5 h-3.5 text-slate-700" /> Instant Access
+            </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

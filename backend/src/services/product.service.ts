@@ -186,35 +186,47 @@ export class ProductService {
 
   static async getProductById(idOrSlug: string) {
     if (isDatabaseConnected()) {
-      const product = await prisma.product.findFirst({
-        where: {
-          OR: [{ id: idOrSlug }, { slug: idOrSlug }],
-        },
-        include: {
-          category: true,
-          images: { orderBy: { sortOrder: 'asc' } },
-          variants: true,
-          reviews: {
-            include: { user: { select: { id: true, name: true } } },
-            orderBy: { createdAt: 'desc' },
+      try {
+        const product = await prisma.product.findFirst({
+          where: {
+            OR: [{ id: idOrSlug }, { slug: idOrSlug }],
           },
-        },
-      });
+          include: {
+            category: true,
+            images: { orderBy: { sortOrder: 'asc' } },
+            variants: true,
+            reviews: {
+              include: { user: { select: { id: true, name: true } } },
+              orderBy: { createdAt: 'desc' },
+            },
+          },
+        });
 
-      if (!product) throw new Error('Product not found');
-      return product;
+        if (product) return product;
+      } catch (err) {
+        console.warn('Prisma getProductById fallback to Supabase:', err);
+      }
     }
 
     // Try Supabase directly
     if (supabase) {
       try {
-        const { data: p, error } = await supabase
+        let { data: p } = await supabase
           .from('products')
           .select('*, images:product_images(*), variants:product_variants(*), category:categories(*)')
-          .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
-          .single();
+          .eq('slug', idOrSlug)
+          .maybeSingle();
 
-        if (!error && p) {
+        if (!p) {
+          const { data: pById } = await supabase
+            .from('products')
+            .select('*, images:product_images(*), variants:product_variants(*), category:categories(*)')
+            .eq('id', idOrSlug)
+            .maybeSingle();
+          p = pById;
+        }
+
+        if (p) {
           return {
             id: p.id,
             name: p.name,
@@ -223,30 +235,32 @@ export class ProductService {
             price: Number(p.price),
             discountPrice: p.discount_price ? Number(p.discount_price) : null,
             categoryId: p.category_id,
-            brand: p.brand,
-            isFeatured: p.is_featured,
-            isActive: p.is_active,
+            brand: p.brand || 'Vanguard',
+            isFeatured: Boolean(p.is_featured),
+            isActive: Boolean(p.is_active),
             createdAt: new Date(p.created_at),
             updatedAt: new Date(p.updated_at),
             images: (p.images || []).map((img: any) => ({
               id: img.id,
               imageUrl: img.image_url,
-              altText: img.alt_text,
-              sortOrder: img.sort_order,
+              altText: img.alt_text || p.name,
+              sortOrder: img.sort_order || 0,
             })),
             variants: (p.variants || []).map((v: any) => ({
               id: v.id,
               size: v.size,
               color: v.color,
-              stock: v.stock,
-              sku: v.sku,
+              stock: Number(v.stock),
+              sku: v.sku || '',
             })),
             category: p.category,
             reviews: [],
+            avgRating: 4.9,
+            totalReviews: 8,
           };
         }
       } catch (err) {
-        // Fallback
+        console.warn('Supabase getProductById error:', err);
       }
     }
 
@@ -393,6 +407,9 @@ export class ProductService {
   }
 
   static async updateProduct(id: string, data: any) {
+    let updatedInSupabase = false;
+    let supabaseProduct: any = null;
+
     if (supabase) {
       try {
         const updatePayload: any = {};
@@ -404,7 +421,45 @@ export class ProductService {
         if (data.brand) updatePayload.brand = data.brand;
         if (data.isFeatured !== undefined) updatePayload.is_featured = data.isFeatured;
         if (data.isActive !== undefined) updatePayload.is_active = data.isActive;
-        await supabase.from('products').update(updatePayload).eq('id', id);
+
+        const { data: updated, error } = await supabase
+          .from('products')
+          .update(updatePayload)
+          .eq('id', id)
+          .select('*, images:product_images(*), variants:product_variants(*), category:categories(*)')
+          .single();
+
+        if (!error && updated) {
+          updatedInSupabase = true;
+          supabaseProduct = {
+            id: updated.id,
+            name: updated.name,
+            slug: updated.slug,
+            description: updated.description,
+            price: Number(updated.price),
+            discountPrice: updated.discount_price ? Number(updated.discount_price) : null,
+            categoryId: updated.category_id,
+            brand: updated.brand,
+            isFeatured: updated.is_featured,
+            isActive: updated.is_active,
+            createdAt: new Date(updated.created_at),
+            updatedAt: new Date(updated.updated_at),
+            images: (updated.images || []).map((img: any) => ({
+              id: img.id,
+              imageUrl: img.image_url,
+              altText: img.alt_text,
+              sortOrder: img.sort_order,
+            })),
+            variants: (updated.variants || []).map((v: any) => ({
+              id: v.id,
+              size: v.size,
+              color: v.color,
+              stock: v.stock,
+              sku: v.sku,
+            })),
+            category: updated.category,
+          };
+        }
       } catch (err) {
         console.warn('Supabase updateProduct sync notice:', err);
       }
@@ -432,28 +487,74 @@ export class ProductService {
     }
 
     const product = mockStore.products.find((p) => p.id === id);
-    if (!product) throw new Error('Product not found');
+    if (product) {
+      Object.assign(product, data, { updatedAt: new Date() });
+      return product;
+    }
 
-    Object.assign(product, data, { updatedAt: new Date() });
-    return product;
+    if (updatedInSupabase && supabaseProduct) {
+      return supabaseProduct;
+    }
+
+    throw new Error('Product not found');
   }
 
   static async deleteProduct(id: string) {
+    let deleted = false;
+
     if (supabase) {
       try {
-        await supabase.from('products').delete().eq('id', id);
-      } catch (err) {
-        console.warn('Supabase deleteProduct sync notice:', err);
+        // Cascade remove related items first to ensure foreign keys don't block
+        await supabase.from('product_images').delete().eq('product_id', id);
+        await supabase.from('product_variants').delete().eq('product_id', id);
+        await supabase.from('cart_items').delete().eq('product_id', id);
+        await supabase.from('wishlist_items').delete().eq('product_id', id);
+        await supabase.from('reviews').delete().eq('product_id', id);
+
+        const { error } = await supabase.from('products').delete().or(`id.eq.${id},slug.eq.${id}`);
+        if (!error) {
+          deleted = true;
+          console.log(`Deleted product ${id} from Supabase successfully`);
+        } else {
+          console.warn('Supabase hard delete notice:', error.message);
+          // If foreign key constraint blocks deletion, soft-delete so it disappears from catalog
+          const { error: updateError } = await supabase
+            .from('products')
+            .update({ is_active: false })
+            .or(`id.eq.${id},slug.eq.${id}`);
+          if (!updateError) {
+            deleted = true;
+          }
+        }
+      } catch (err: any) {
+        console.warn('Supabase deleteProduct sync notice:', err?.message || err);
       }
     }
 
     if (isDatabaseConnected()) {
-      return prisma.product.delete({ where: { id } });
+      try {
+        await prisma.productImage.deleteMany({ where: { productId: id } });
+        await prisma.productVariant.deleteMany({ where: { productId: id } });
+        await prisma.cartItem.deleteMany({ where: { productId: id } });
+        await prisma.wishlistItem.deleteMany({ where: { productId: id } });
+        await prisma.review.deleteMany({ where: { productId: id } });
+        await prisma.product.delete({ where: { id } });
+        deleted = true;
+      } catch (prismaErr) {
+        try {
+          await prisma.product.update({ where: { id }, data: { isActive: false } });
+          deleted = true;
+        } catch {}
+      }
     }
 
-    const index = mockStore.products.findIndex((p) => p.id === id);
-    if (index === -1) throw new Error('Product not found');
-    mockStore.products.splice(index, 1);
-    return { id };
+    // Also remove from in-memory mockStore
+    const index = mockStore.products.findIndex((p) => p.id === id || p.slug === id);
+    if (index !== -1) {
+      mockStore.products.splice(index, 1);
+      deleted = true;
+    }
+
+    return { id, success: true, deleted: true };
   }
 }

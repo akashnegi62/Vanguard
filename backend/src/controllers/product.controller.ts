@@ -14,7 +14,8 @@ export class ProductController {
 
   static async getProductById(req: Request, res: Response) {
     try {
-      const product = await ProductService.getProductById(req.params.id);
+      const identifier = (req.params.slug || req.params.id) as string;
+      const product = await ProductService.getProductById(identifier);
       return sendSuccess(res, 'Product fetched successfully', product);
     } catch (error: any) {
       return sendError(res, error.message || 'Product not found', 404, 'PRODUCT_NOT_FOUND');

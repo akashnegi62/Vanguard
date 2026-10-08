@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -19,25 +19,194 @@ import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 
-const CATEGORIES = [
-  { name: 'T-Shirts', href: '/products?category=t-shirts' },
-  { name: 'Shirts', href: '/products?category=shirts' },
-  { name: 'Jeans', href: '/products?category=jeans' },
-  { name: 'Trousers', href: '/products?category=trousers' },
-  { name: 'Jackets', href: '/products?category=jackets' },
-  { name: 'Hoodies', href: '/products?category=hoodies' },
-  { name: 'Shorts', href: '/products?category=shorts' },
+interface DropdownItem {
+  name: string;
+  href: string;
+}
+
+interface DropdownColumn {
+  title: string;
+  items: DropdownItem[];
+}
+
+interface NavCategory {
+  id: string;
+  name: string;
+  href: string;
+  alignRight?: boolean;
+  columns?: DropdownColumn[];
+}
+
+const NAV_ITEMS: NavCategory[] = [
+  {
+    id: 'mens',
+    name: 'MENS',
+    href: '/products?department=men',
+    columns: [
+      {
+        title: 'Topwear',
+        items: [
+          { name: 'Plain T-shirts', href: '/products?category=t-shirts&style=plain' },
+          { name: 'Printed T-shirts', href: '/products?category=t-shirts&style=printed' },
+          { name: 'Oversized T-shirts', href: '/products?category=t-shirts&fit=oversized' },
+          { name: 'Polo T-shirts', href: '/products?category=t-shirts&style=polo' },
+          { name: 'Plain Shirts', href: '/products?category=shirts&style=plain' },
+          { name: 'Oxford Shirts', href: '/products?category=shirts&style=oxford' },
+          { name: 'View All', href: '/products?category=t-shirts' },
+        ],
+      },
+      {
+        title: 'Bottomwear',
+        items: [
+          { name: 'Selvedge Raw Denim', href: '/products?category=jeans&style=selvedge' },
+          { name: 'Regular Straight Jeans', href: '/products?category=jeans&fit=straight' },
+          { name: 'Relaxed Wide Leg', href: '/products?category=jeans&fit=relaxed' },
+          { name: 'Pleated Wool Trousers', href: '/products?category=trousers&style=pleated' },
+          { name: 'Smart Stretch Chinos', href: '/products?category=trousers&style=chino' },
+          { name: 'Tailored Chino Shorts', href: '/products?category=shorts&style=chino' },
+          { name: 'View All', href: '/products?category=jeans' },
+        ],
+      },
+      {
+        title: 'Winterwear & Knits',
+        items: [
+          { name: '480 GSM Loopback Hoodies', href: '/products?category=hoodies' },
+          { name: 'Crewneck Sweatshirts', href: '/products?category=hoodies&style=crewneck' },
+          { name: 'Structured Wool Overcoats', href: '/products?category=jackets&style=overcoat' },
+          { name: 'Vintage Selvedge Denim Jackets', href: '/products?category=jackets&style=denim' },
+          { name: 'Cashmere Sweaters', href: '/products?category=t-shirts' },
+          { name: 'View All', href: '/products?category=jackets' },
+        ],
+      },
+      {
+        title: 'Footwear & Drops',
+        items: [
+          { name: 'Italian Calfskin Low-Tops', href: '/products?category=sneakers&style=low-top' },
+          { name: 'Heritage High-Tops', href: '/products?category=sneakers&style=high-top' },
+          { name: 'Belgian Suede Slip-Ons', href: '/products?category=sneakers&style=slip-on' },
+          { name: 'Minimalist Leather Loafers', href: '/products?category=sneakers&style=loafers' },
+          { name: 'View All', href: '/products?category=sneakers' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'womens',
+    name: 'WOMENS',
+    href: '/products?department=women',
+    columns: [
+      {
+        title: 'Topwear',
+        items: [
+          { name: 'Everyday Cotton Tees', href: '/products?department=women&category=t-shirts' },
+          { name: 'Oversized Boyfriend Tees', href: '/products?department=women&fit=oversized' },
+          { name: 'Tailored Blouses', href: '/products?department=women&category=shirts' },
+          { name: 'Satin & Silk Shirts', href: '/products?department=women&style=satin' },
+          { name: 'Ribbed Knit Polos', href: '/products?department=women&category=t-shirts' },
+          { name: 'View All', href: '/products?department=women&type=topwear' },
+        ],
+      },
+      {
+        title: 'Bottomwear',
+        items: [
+          { name: 'High-Rise Straight Jeans', href: '/products?department=women&category=jeans' },
+          { name: 'Wide-Leg Pleated Trousers', href: '/products?department=women&category=trousers' },
+          { name: 'Silk Blend Slacks', href: '/products?department=women&category=trousers' },
+          { name: 'Relaxed Denim Shorts', href: '/products?department=women&category=shorts' },
+          { name: 'Linen Resort Pants', href: '/products?department=women&category=trousers' },
+          { name: 'View All', href: '/products?department=women&type=bottomwear' },
+        ],
+      },
+      {
+        title: 'Outerwear & Knits',
+        items: [
+          { name: 'Tailored Wool Overcoats', href: '/products?department=women&category=jackets' },
+          { name: 'Luxury Cashmere Crewnecks', href: '/products?department=women&category=t-shirts' },
+          { name: 'Cropped Denim Jackets', href: '/products?department=women&category=jackets' },
+          { name: 'Ribbed Long Cardigans', href: '/products?department=women&category=jackets' },
+          { name: 'View All', href: '/products?department=women&category=jackets' },
+        ],
+      },
+      {
+        title: 'Sneakers & Shoes',
+        items: [
+          { name: 'Clean Court Low-Tops', href: '/products?department=women&category=sneakers' },
+          { name: 'Platform Sneakers', href: '/products?department=women&category=sneakers' },
+          { name: 'Leather Penny Loafers', href: '/products?department=women&category=sneakers' },
+          { name: 'Suede Mules & Slides', href: '/products?department=women&category=sneakers' },
+          { name: 'View All', href: '/products?department=women&category=sneakers' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'sneakers',
+    name: 'SNEAKERS',
+    href: '/products?category=sneakers',
+    columns: [
+      {
+        title: 'Low-Tops',
+        items: [
+          { name: 'Italian Calfskin Low-Tops', href: '/products?category=sneakers&style=low-top' },
+          { name: 'Minimalist White Court', href: '/products?category=sneakers&style=court' },
+          { name: 'Retro Athletic Trainers', href: '/products?category=sneakers&style=runners' },
+          { name: 'Suede Gum-Sole Trainers', href: '/products?category=sneakers&style=gum-sole' },
+          { name: 'Raw Canvas Lows', href: '/products?category=sneakers&style=canvas' },
+          { name: 'View All', href: '/products?category=sneakers' },
+        ],
+      },
+      {
+        title: 'High-Tops & Boots',
+        items: [
+          { name: 'Heritage Court High-Tops', href: '/products?category=sneakers&style=high-top' },
+          { name: 'Italian Suede Chelsea Boots', href: '/products?category=sneakers&style=boots' },
+          { name: 'Minimalist Combat High-Tops', href: '/products?category=sneakers&style=combat' },
+          { name: 'Desert Suede Boots', href: '/products?category=sneakers&style=boots' },
+          { name: 'View All', href: '/products?category=sneakers' },
+        ],
+      },
+      {
+        title: 'Slip-Ons & Loafers',
+        items: [
+          { name: 'Belgian Suede Slip-Ons', href: '/products?category=sneakers&style=slip-on' },
+          { name: 'Minimalist Leather Loafers', href: '/products?category=sneakers&style=loafers' },
+          { name: 'Leather Mules', href: '/products?category=sneakers&style=mule' },
+          { name: 'Driving Shoes', href: '/products?category=sneakers&style=loafers' },
+          { name: 'View All', href: '/products?category=sneakers' },
+        ],
+      },
+      {
+        title: 'Shop By Department',
+        items: [
+          { name: "Men's Sneaker Collection", href: '/products?department=men&category=sneakers' },
+          { name: "Women's Sneaker Collection", href: '/products?department=women&category=sneakers' },
+          { name: 'Studio Collaboration Drops', href: '/products?category=sneakers' },
+          { name: 'Archival Reissues', href: '/products?category=sneakers' },
+          { name: 'View All', href: '/products?category=sneakers' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'new-arrivals',
+    name: 'NEW ARRIVALS',
+    href: '/products?sort=newest',
+  },
 ];
 
 export default function Navbar() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedMobileCategory, setExpandedMobileCategory] = useState<string | null>('mens');
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const { user, logout, quickLoginAsUser, quickLoginAsAdmin } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const cartItemCount = useCartStore((s) => s.getTotalCount());
   const wishlistItems = useWishlistStore((s) => s.items);
 
@@ -60,6 +229,19 @@ export default function Navbar() {
       document.body.style.overflow = 'unset';
     };
   }, [mobileMenuOpen]);
+
+  const handleMouseEnter = (catId: string) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    setActiveDropdown(catId);
+  };
+
+  const handleMouseLeave = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null);
+    }, 150);
+  };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,29 +297,80 @@ export default function Navbar() {
               </span>
             </Link>
 
-            {/* Desktop Navigation Links (LG screens and above - strictly single line with All) */}
-            <nav className="hidden lg:flex items-center gap-3 xl:gap-5 2xl:gap-7 whitespace-nowrap shrink-0">
-              <Link
-                href="/products"
-                className="text-xs uppercase font-bold tracking-wider text-slate-900 hover:text-brand-600 transition-colors py-2 whitespace-nowrap"
-              >
-                All
-              </Link>
-              {CATEGORIES.map((cat) => (
-                <Link
-                  key={cat.name}
-                  href={cat.href}
-                  className="text-xs uppercase font-semibold tracking-wider text-slate-600 hover:text-slate-950 transition-colors py-2 whitespace-nowrap"
-                >
-                  {cat.name}
-                </Link>
-              ))}
+            {/* Desktop Navigation Links: TOPWEAR, BOTTOMWEAR, SNEAKERS, WINTERWEAR, COMBOS, NEW ARRIVALS */}
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-2 whitespace-nowrap shrink-0 ml-4">
+              {NAV_ITEMS.map((item) => {
+                const isOpen = activeDropdown === item.id;
+                const hasColumns = Boolean(item.columns && item.columns.length > 0);
+
+                return (
+                  <div
+                    key={item.id}
+                    onMouseEnter={() => hasColumns && handleMouseEnter(item.id)}
+                    onMouseLeave={hasColumns ? handleMouseLeave : undefined}
+                    className="relative"
+                  >
+                    <Link
+                      href={item.href}
+                      className={`flex items-center gap-1 text-xs uppercase font-extrabold tracking-wider px-3 py-2 rounded-lg transition-all ${
+                        isOpen
+                          ? 'text-slate-950 font-black'
+                          : 'text-slate-800 hover:text-slate-950 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span>{item.name}</span>
+                      {hasColumns && (
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                            isOpen ? 'rotate-180 text-slate-950' : 'text-slate-500'
+                          }`}
+                        />
+                      )}
+                    </Link>
+
+                    {/* Floating Dropdown Card (Beyoung Style) */}
+                    {hasColumns && isOpen && (
+                      <div
+                        className={`absolute top-full ${item.alignRight ? 'right-0' : 'left-0'} pt-2.5 z-50 animate-fadeIn`}
+                        onMouseEnter={() => handleMouseEnter(item.id)}
+                        onMouseLeave={handleMouseLeave}
+                      >
+                        <div className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.14)] border border-slate-100 px-8 py-7 sm:px-9 sm:py-8 flex gap-12 sm:gap-14 min-w-max text-left">
+                          {item.columns!.map((col, idx) => (
+                            <div key={idx} className="min-w-[130px] flex flex-col">
+                              <h4 className="text-[15px] font-bold text-slate-900 tracking-tight mb-3.5">
+                                {col.title}
+                              </h4>
+                              <div className="flex flex-col space-y-1.5">
+                                {col.items.map((subItem) => (
+                                  <Link
+                                    key={subItem.name}
+                                    href={subItem.href}
+                                    onClick={() => setActiveDropdown(null)}
+                                    className={`text-[13.5px] py-1 transition-colors whitespace-nowrap leading-snug block ${
+                                      subItem.name === 'View All'
+                                        ? 'text-slate-900 font-medium hover:text-slate-950 hover:underline pt-1'
+                                        : 'text-slate-600 hover:text-slate-950 font-normal'
+                                    }`}
+                                  >
+                                    {subItem.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </nav>
 
             {/* Search Bar on Desktop */}
             <form
               onSubmit={handleSearchSubmit}
-              className="hidden sm:flex relative items-center w-36 md:w-44 lg:w-48 xl:w-64 shrink-0 ml-auto mr-2"
+              className="hidden sm:flex relative items-center w-36 md:w-44 lg:w-48 xl:w-60 shrink-0 ml-auto mr-2"
             >
               <input
                 type="text"
@@ -305,7 +538,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                className="p-2 rounded-lg text-slate-500 hover:text-slate-950 hover:bg-slate-100"
                 aria-label="Close menu"
               >
                 <X className="w-5 h-5" />
@@ -326,37 +559,73 @@ export default function Navbar() {
               </form>
             </div>
 
-            {/* Categories Navigation */}
+            {/* Departments & Subcategories Accordions */}
             <div className="p-5 flex-1 space-y-4">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                  Departments
+              <Link
+                href="/products"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between py-2 px-3 rounded-xl bg-slate-100 text-xs font-black uppercase tracking-wider text-slate-900 hover:bg-slate-200 transition-colors"
+              >
+                <span>Browse All Products</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+
+              <div className="space-y-3 pt-2">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Store Categories
                 </p>
-                <div className="space-y-1">
-                  <Link
-                    href="/products"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-between py-2 text-sm font-bold text-slate-900 hover:text-brand-600 border-b border-slate-50"
-                  >
-                    <span>All</span>
-                    <ArrowRight className="w-4 h-4 text-slate-400" />
-                  </Link>
-                  {CATEGORIES.map((cat) => (
-                    <Link
-                      key={cat.name}
-                      href={cat.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center justify-between py-2 text-sm font-medium text-slate-700 hover:text-slate-950 border-b border-slate-50"
-                    >
-                      <span>{cat.name}</span>
-                      <ArrowRight className="w-4 h-4 text-slate-300" />
-                    </Link>
-                  ))}
-                </div>
+
+                {NAV_ITEMS.filter((item) => item.columns).map((cat) => {
+                  const isExpanded = expandedMobileCategory === cat.id;
+                  return (
+                    <div key={cat.id} className="border border-slate-200 rounded-2xl overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedMobileCategory(isExpanded ? null : cat.id)}
+                        className="w-full flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 text-left transition-colors"
+                      >
+                        <span className="font-display font-black text-sm uppercase tracking-wide text-slate-950">
+                          {cat.name}
+                        </span>
+                        <ChevronDown
+                          className={`w-4 h-4 text-slate-500 transition-transform ${
+                            isExpanded ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+
+                      {isExpanded && (
+                        <div className="p-3 bg-white space-y-3">
+                          {cat.columns!.map((col, idx) => (
+                            <div key={idx} className="space-y-1.5 border-b border-slate-50 pb-2 last:border-0 last:pb-0">
+                              <h5 className="text-xs font-bold text-slate-950">{col.title}</h5>
+                              <div className="space-y-1 pl-2">
+                                {col.items.map((sub) => (
+                                  <Link
+                                    key={sub.name}
+                                    href={sub.href}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className={`block py-1 text-xs transition-colors ${
+                                      sub.name === 'View All'
+                                        ? 'font-semibold text-slate-900 underline'
+                                        : 'text-slate-600 hover:text-slate-950'
+                                    }`}
+                                  >
+                                    {sub.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Customer Account Links */}
-              <div className="pt-2">
+              <div className="pt-3 border-t border-slate-100">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
                   Account & Orders
                 </p>
@@ -382,71 +651,53 @@ export default function Navbar() {
                   >
                     <span>My Orders</span>
                   </Link>
-                  <Link
-                    href="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-between py-1.5 text-brand-700 font-bold"
-                  >
-                    <span>Admin Portal</span>
-                  </Link>
+                  {user?.role === 'ADMIN' && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between py-1.5 text-brand-700 font-bold"
+                    >
+                      <span>Admin Portal</span>
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Quick Demo Switchers & Auth */}
+            {/* Account Actions in Mobile Drawer */}
             <div className="p-5 bg-slate-50 border-t border-slate-100 space-y-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Evaluation Instant Logins
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    quickLoginAsUser();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="py-2 px-3 text-xs font-bold rounded-lg bg-white border border-slate-200 text-slate-800 shadow-sm hover:bg-slate-100"
-                >
-                  Login as User
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    quickLoginAsAdmin();
-                    setMobileMenuOpen(false);
-                    router.push('/admin');
-                  }}
-                  className="py-2 px-3 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm hover:bg-slate-800"
-                >
-                  Login as Admin
-                </button>
-              </div>
-
               {user ? (
-                <button
-                  onClick={() => {
-                    logout();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full py-2 text-xs font-semibold text-red-600 hover:underline"
-                >
-                  Sign Out
-                </button>
+                <div className="space-y-2">
+                  <div className="px-1 py-1">
+                    <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
+                    <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setMobileMenuOpen(false);
+                      router.push('/');
+                    }}
+                    className="w-full py-2.5 text-center text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </div>
               ) : (
-                <div className="flex gap-2 pt-1">
+                <div className="flex gap-2">
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 py-2 text-center text-xs font-semibold text-slate-700 border border-slate-200 rounded-lg bg-white"
+                    className="flex-1 py-2.5 text-center text-xs font-bold text-slate-800 border border-slate-200 rounded-xl bg-white hover:bg-slate-100 transition-colors"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 py-2 text-center text-xs font-bold text-white bg-slate-900 rounded-lg"
+                    className="flex-1 py-2.5 text-center text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-colors"
                   >
-                    Register
+                    Join
                   </Link>
                 </div>
               )}

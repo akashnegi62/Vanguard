@@ -32,6 +32,17 @@ export class AdminController {
     }
   }
 
+  static async updateUserRole(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { role } = req.body;
+      const user = await AdminService.updateUserRole(id, role);
+      return sendSuccess(res, 'User role updated successfully', user);
+    } catch (error: any) {
+      return sendError(res, error.message || 'Failed to update user role', 400);
+    }
+  }
+
   static async getOrders(req: Request, res: Response) {
     try {
       const orders = await AdminService.getOrders(req.query);

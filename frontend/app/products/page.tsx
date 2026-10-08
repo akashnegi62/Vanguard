@@ -22,6 +22,7 @@ function ProductsContent() {
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Read filter params
+  const department = searchParams.get('department') || undefined;
   const category = searchParams.get('category') || undefined;
   const search = searchParams.get('search') || undefined;
   const size = searchParams.get('size') || undefined;
@@ -39,6 +40,7 @@ function ProductsContent() {
 
     api
       .getProducts({
+        department,
         category,
         search,
         size,
@@ -72,7 +74,7 @@ function ProductsContent() {
     return () => {
       isMounted = false;
     };
-  }, [category, search, size, color, brand, minPrice, maxPrice, rating, sort, page]);
+  }, [department, category, search, size, color, brand, minPrice, maxPrice, rating, sort, page]);
 
   const updateFilters = (newParams: Record<string, any>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -98,10 +100,18 @@ function ProductsContent() {
       {/* Header Banner */}
       <div className="mb-8">
         <h1 className="text-3xl sm:text-4xl font-black text-slate-950 uppercase tracking-tight font-display">
-          {category ? category.replace('-', ' ') : 'All Collections'}
+          {department
+            ? `${department.toUpperCase()}'S COLLECTION`
+            : category
+            ? category.replace('-', ' ')
+            : 'All Collections'}
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 mt-1.5 font-medium">
-          {search ? `Search results for "${search}"` : 'Artisanal menswear engineered with heavyweight textiles.'}
+          {search
+            ? `Search results for "${search}"`
+            : department
+            ? `Curated luxury garments crafted for the ${department} collection.`
+            : 'Artisanal garments engineered with heavyweight luxury textiles.'}
         </p>
       </div>
 

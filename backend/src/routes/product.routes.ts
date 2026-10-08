@@ -10,6 +10,7 @@ import { createReviewSchema } from '../validators/order.validator';
 const router = Router();
 
 router.get('/', ProductController.getProducts);
+router.get('/slug/:slug', ProductController.getProductById);
 router.get('/:id', ProductController.getProductById);
 
 // Reviews on product

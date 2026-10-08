@@ -52,20 +52,58 @@ export default function ProductDetailPage() {
     if (!slug) return;
     setIsLoading(true);
 
+    const cleanSlug = decodeURIComponent(slug);
+
     api
-      .getProductBySlug(slug)
+      .getProductBySlug(cleanSlug)
       .then((res) => {
         const prod = res.data;
-        setProduct(prod);
-        if (prod.variants && prod.variants.length > 0) {
-          setSelectedVariant(prod.variants[0]);
+        if (!prod) {
+          setProduct(null);
+          return;
         }
-        api.getProducts({ category: prod.categoryId, limit: 4 }).then((relRes) => {
-          setRelatedProducts(relRes.data.filter((p) => p.id !== prod.id).slice(0, 4));
-        });
+
+        // Defensive normalization for newly added products
+        if (!prod.images || prod.images.length === 0) {
+          prod.images = [
+            {
+              id: 'img-fallback',
+              imageUrl: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=900',
+              sortOrder: 0,
+              altText: prod.name,
+            },
+          ];
+        }
+        if (!prod.variants || prod.variants.length === 0) {
+          prod.variants = [
+            {
+              id: `var-${prod.id}`,
+              productId: prod.id,
+              size: 'M',
+              color: 'Standard',
+              stock: 10,
+              sku: `${prod.slug}-M`,
+            },
+          ];
+        }
+
+        setProduct(prod);
+        setSelectedVariant(prod.variants[0]);
+
+        if (prod.categoryId) {
+          api
+            .getProducts({ category: prod.categoryId, limit: 4 })
+            .then((relRes) => {
+              if (relRes?.data) {
+                setRelatedProducts(relRes.data.filter((p) => p.id !== prod.id).slice(0, 4));
+              }
+            })
+            .catch(() => {});
+        }
       })
       .catch((err) => {
-        console.error(err);
+        console.error('Failed to load product details:', err);
+        setProduct(null);
       })
       .finally(() => {
         setIsLoading(false);
@@ -148,8 +186,9 @@ export default function ProductDetailPage() {
     }
   };
 
-  const availableSizes = Array.from(new Set(product.variants.map((v) => v.size)));
-  const availableColors = Array.from(new Set(product.variants.map((v) => v.color)));
+  const availableVariants = product.variants || [];
+  const availableSizes = Array.from(new Set(availableVariants.map((v) => v.size)));
+  const availableColors = Array.from(new Set(availableVariants.map((v) => v.color)));
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-slate-900">

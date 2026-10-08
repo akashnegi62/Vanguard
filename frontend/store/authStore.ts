@@ -9,7 +9,14 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    phone?: string,
+    role?: 'USER' | 'ADMIN',
+    adminSecret?: string
+  ) => Promise<boolean>;
   logout: () => void;
   quickLoginAsUser: () => void;
   quickLoginAsAdmin: () => void;
@@ -52,10 +59,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  register: async (name: string, email: string, password: string, phone?: string) => {
+  register: async (
+    name: string,
+    email: string,
+    password: string,
+    phone?: string,
+    role?: 'USER' | 'ADMIN',
+    adminSecret?: string
+  ) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api.register(name, email, password, phone);
+      const res = await api.register(name, email, password, phone, role, adminSecret);
       const { user, token } = res.data;
       localStorage.setItem('mens_store_token', token);
       localStorage.setItem('mens_store_user', JSON.stringify(user));

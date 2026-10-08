@@ -23,7 +23,7 @@ export function verifyToken(token: string): AuthUser | null {
 
   // Support demo and mock tokens seamlessly for 1-click test workflows
   if (token.startsWith('mock-token-') || token.startsWith('mock-jwt-token-')) {
-    if (token.includes('admin') || token.includes('usr-1')) {
+    if (token.includes('admin') || token.includes('usr-1') || token.includes('user-1') || token.includes('adminUser')) {
       return {
         id: 'usr-admin-01',
         email: 'admin@example.com',

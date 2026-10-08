@@ -111,15 +111,15 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Administration & Info */}
+          {/* Client Account & Support */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-slate-950 uppercase tracking-widest">Portal & Roles</h4>
+            <h4 className="text-xs font-bold text-slate-950 uppercase tracking-widest">Client Portal</h4>
             <ul className="space-y-2 text-xs sm:text-sm">
-              <li><Link href="/admin" className="text-slate-900 font-bold hover:underline">Admin Portal</Link></li>
-              <li><Link href="/admin/products" className="hover:text-slate-950 transition-colors">Catalog Management</Link></li>
-              <li><Link href="/admin/orders" className="hover:text-slate-950 transition-colors">Order Fulfillment</Link></li>
-              <li><Link href="/login" className="hover:text-slate-950 transition-colors">Customer Login</Link></li>
-              <li><Link href="/register" className="hover:text-slate-950 transition-colors">Create Account</Link></li>
+              <li><Link href="/login" className="hover:text-slate-950 transition-colors">Client Sign In</Link></li>
+              <li><Link href="/register" className="hover:text-slate-950 transition-colors">Create Client Account</Link></li>
+              <li><Link href="/profile" className="hover:text-slate-950 transition-colors">Personal Wardrobe</Link></li>
+              <li><Link href="/orders" className="hover:text-slate-950 transition-colors">Shipping & Returns</Link></li>
+              <li><span className="text-slate-400">Concierge: concierge@vanguard.store</span></li>
             </ul>
           </div>
         </div>

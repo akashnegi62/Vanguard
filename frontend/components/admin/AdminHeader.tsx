@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { LogOut } from 'lucide-react';
 
@@ -11,7 +11,13 @@ interface AdminHeaderProps {
 }
 
 export default function AdminHeader({ title, subtitle, action }: AdminHeaderProps) {
+  const router = useRouter();
   const { user, logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/admin/login');
+  };
 
   return (
     <header className="h-20 px-8 border-b border-slate-200 bg-white/95 backdrop-blur-md flex items-center justify-between">
@@ -32,7 +38,7 @@ export default function AdminHeader({ title, subtitle, action }: AdminHeaderProp
           </div>
 
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors border border-slate-200"
             title="Log out"
           >

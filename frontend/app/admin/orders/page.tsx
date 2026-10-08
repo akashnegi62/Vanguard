@@ -40,18 +40,34 @@ export default function AdminOrdersPage() {
       });
   }, []);
 
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
-    await api.updateOrderStatus(orderId, newStatus);
-    setOrders(
-      orders.map((o) => (o.id === orderId ? { ...o, orderStatus: newStatus } : o))
-    );
+    try {
+      await api.updateOrderStatus(orderId, newStatus);
+      setOrders(
+        orders.map((o) => (o.id === orderId ? { ...o, orderStatus: newStatus } : o))
+      );
+      setFeedback({ type: 'success', message: `Order #${orderId.slice(-6)} status updated to ${newStatus}.` });
+      setTimeout(() => setFeedback(null), 3000);
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message || 'Failed to update order status.' });
+      setTimeout(() => setFeedback(null), 3000);
+    }
   };
 
   const handleUpdatePaymentStatus = async (orderId: string, newStatus: PaymentStatus) => {
-    await api.updatePaymentStatus(orderId, newStatus);
-    setOrders(
-      orders.map((o) => (o.id === orderId ? { ...o, paymentStatus: newStatus } : o))
-    );
+    try {
+      await api.updatePaymentStatus(orderId, newStatus);
+      setOrders(
+        orders.map((o) => (o.id === orderId ? { ...o, paymentStatus: newStatus } : o))
+      );
+      setFeedback({ type: 'success', message: `Order #${orderId.slice(-6)} payment status updated to ${newStatus}.` });
+      setTimeout(() => setFeedback(null), 3000);
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message || 'Failed to update payment status.' });
+      setTimeout(() => setFeedback(null), 3000);
+    }
   };
 
   const filtered = orders.filter((o) => {
@@ -75,6 +91,18 @@ export default function AdminOrdersPage() {
         />
 
         <main className="flex-1 p-8 space-y-6 overflow-y-auto">
+          {feedback && (
+            <div
+              className={`p-3.5 rounded-xl border flex items-center gap-2 text-xs font-semibold ${
+                feedback.type === 'success'
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
+              <span>{feedback.message}</span>
+            </div>
+          )}
+
           {/* Controls bar */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="relative max-w-md w-full">

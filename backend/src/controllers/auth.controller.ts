@@ -6,8 +6,8 @@ import { AuthenticatedRequest } from '../types';
 export class AuthController {
   static async register(req: Request, res: Response) {
     try {
-      const { name, email, password, phone } = req.body;
-      const result = await AuthService.register(name, email, password, phone);
+      const { name, email, password, phone, role, adminSecret } = req.body;
+      const result = await AuthService.register(name, email, password, phone, role, adminSecret);
       return sendSuccess(res, 'User registered successfully', result, 201);
     } catch (error: any) {
       return sendError(res, error.message || 'Registration failed', 400);

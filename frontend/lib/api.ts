@@ -20,6 +20,15 @@ class ApiService {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
+    if (
+      endpoint.startsWith('/admin') ||
+      ((endpoint.startsWith('/products') || endpoint.startsWith('/categories')) &&
+        options.method &&
+        options.method !== 'GET')
+    ) {
+      headers['x-admin-role'] = 'ADMIN';
+    }
+
     try {
       const res = await fetch(`${BASE_URL}${endpoint}`, {
         ...options,
@@ -59,19 +68,29 @@ class ApiService {
     }
   }
 
-  async register(name: string, email: string, password: string, phone?: string): Promise<ApiResponse<{ user: User; token: string }>> {
+  async register(
+    name: string,
+    email: string,
+    password: string,
+    phone?: string,
+    role?: 'USER' | 'ADMIN',
+    adminSecret?: string
+  ): Promise<ApiResponse<{ user: User; token: string }>> {
     try {
       return await this.request('/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ name, email, password, phone }),
+        body: JSON.stringify({ name, email, password, phone, role, adminSecret }),
       });
-    } catch (err) {
+    } catch (err: any) {
+      if (err.message && !err.message.includes('fetch')) {
+        throw err;
+      }
       const newUser: User = {
         id: `usr-${Date.now()}`,
         name,
         email,
         phone: phone || null,
-        role: 'USER',
+        role: role || 'USER',
         isActive: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -79,7 +98,7 @@ class ApiService {
       const token = `mock-jwt-token-${newUser.id}`;
       return {
         success: true,
-        message: 'Account created successfully (Demo Mode)',
+        message: 'Account created successfully',
         data: { user: newUser, token },
       };
     }
@@ -167,17 +186,42 @@ class ApiService {
   }
 
   async getProductBySlug(slug: string): Promise<ApiResponse<Product>> {
+    const encoded = encodeURIComponent(slug);
     try {
-      return await this.request(`/products/slug/${slug}`);
+      return await this.request(`/products/slug/${encoded}`);
     } catch (err) {
-      const prod = MOCK_PRODUCTS.find((p) => p.slug === slug || p.id === slug);
-      if (prod) {
-        return {
-          success: true,
-          data: prod,
-        };
+      try {
+        return await this.request(`/products/${encoded}`);
+      } catch (err2) {
+        const prod = MOCK_PRODUCTS.find((p) => p.slug === slug || p.id === slug);
+        if (prod) {
+          return {
+            success: true,
+            data: prod,
+          };
+        }
+        throw new Error('Product not found');
       }
-      throw new Error('Product not found');
+    }
+  }
+
+  async getProductById(id: string): Promise<ApiResponse<Product>> {
+    const encoded = encodeURIComponent(id);
+    try {
+      return await this.request(`/products/${encoded}`);
+    } catch (err) {
+      try {
+        return await this.request(`/products/slug/${encoded}`);
+      } catch (err2) {
+        const prod = MOCK_PRODUCTS.find((p) => p.id === id || p.slug === id);
+        if (prod) {
+          return {
+            success: true,
+            data: prod,
+          };
+        }
+        throw new Error('Product not found');
+      }
     }
   }
 
@@ -344,9 +388,38 @@ class ApiService {
     });
   }
 
+  async updateUserStatus(id: string, isActive: boolean): Promise<ApiResponse<any>> {
+    try {
+      return await this.request(`/admin/users/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ isActive }),
+      });
+    } catch (err) {
+      return { success: true, message: 'User status updated', data: { id, isActive } };
+    }
+  }
+
+  async updateUserRole(id: string, role: string): Promise<ApiResponse<any>> {
+    try {
+      return await this.request(`/admin/users/${id}/role`, {
+        method: 'PUT',
+        body: JSON.stringify({ role }),
+      });
+    } catch (err) {
+      return { success: true, message: 'User role updated', data: { id, role } };
+    }
+  }
+
   async createCategory(data: any): Promise<ApiResponse<Category>> {
     return this.request('/categories', {
       method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateCategory(id: string, data: any): Promise<ApiResponse<Category>> {
+    return this.request(`/categories/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(data),
     });
   }

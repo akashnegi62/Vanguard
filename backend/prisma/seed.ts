@@ -116,7 +116,7 @@ async function main() {
       name: 'Jeans',
       slug: 'jeans',
       description: 'Kurabo and Kaihara Japanese selvedge denim in raw and washed profiles.',
-      imageUrl: 'https://images.unsplash.com/photo-1542272604-780c96856592?w=800&auto=format&fit=crop&q=80',
+      imageUrl: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&auto=format&fit=crop&q=80',
     },
     {
       id: 'cat-trousers',
@@ -210,7 +210,7 @@ async function main() {
       brand: 'Kojima Selvedge',
       isFeatured: true,
       images: [
-        'https://images.unsplash.com/photo-1542272604-780c96856592?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1582552938357-32b906df40cb?w=800&auto=format&fit=crop&q=80',
         'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&auto=format&fit=crop&q=80',
       ],
       variants: [

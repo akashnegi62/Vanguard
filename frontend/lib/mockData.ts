@@ -24,7 +24,7 @@ export const MOCK_CATEGORIES: Category[] = [
     name: 'Jeans',
     slug: 'jeans',
     description: 'Japanese selvedge, classic straight, and contemporary tapered denim.',
-    imageUrl: 'https://images.unsplash.com/photo-1542272604-780c96856592?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&auto=format&fit=crop&q=80',
     isActive: true,
     productCount: 5,
   },
@@ -369,7 +369,7 @@ export const MOCK_PRODUCTS: Product[] = [
     totalReviews: 40,
     totalStock: 35,
     images: [
-      { id: 'img-14', imageUrl: 'https://images.unsplash.com/photo-1542272604-780c96856592?w=900&auto=format&fit=crop&q=80', sortOrder: 0, altText: 'Selvedge Denim' },
+      { id: 'img-14', imageUrl: 'https://images.unsplash.com/photo-1582552938357-32b906df40cb?w=900&auto=format&fit=crop&q=80', sortOrder: 0, altText: 'Selvedge Denim' },
       { id: 'img-15', imageUrl: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=900&auto=format&fit=crop&q=80', sortOrder: 1, altText: 'Denim Rear View' },
     ],
     variants: [

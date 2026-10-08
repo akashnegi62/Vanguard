@@ -9,6 +9,7 @@ export const createProductSchema = z.object({
   categoryId: z.string().min(1, 'Category is required'),
   brand: z.string().default('Vanguard Atelier'),
   isFeatured: z.boolean().default(false),
+  isActive: z.boolean().default(true).optional(),
   images: z.array(z.string().min(1)).min(1, 'At least one image is required'),
   variants: z.array(
     z.object({
