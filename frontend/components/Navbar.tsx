@@ -109,12 +109,9 @@ export default function Navbar() {
             </div>
 
             {/* Brand Logo */}
-            <Link href="/" className="flex items-center gap-1.5 group shrink-0">
+            <Link href="/" className="flex items-center group shrink-0">
               <span className="font-display text-xl sm:text-2xl md:text-3xl font-black tracking-widest text-slate-950 uppercase group-hover:text-slate-700 transition-colors">
                 VANGUARD
-              </span>
-              <span className="hidden sm:inline-block text-[10px] tracking-widest uppercase text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 font-bold">
-                MENSWEAR
               </span>
             </Link>
 
@@ -291,7 +288,7 @@ export default function Navbar() {
 
       {/* Full-Screen Mobile / Tablet Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 xl:hidden flex">
+        <div className="fixed inset-0 z-50 lg:hidden flex">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity"
