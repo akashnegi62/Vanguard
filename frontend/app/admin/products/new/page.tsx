@@ -100,6 +100,12 @@ export default function NewProductPage() {
             </div>
           )}
 
+          {errorMsg && (
+            <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl flex items-center gap-2">
+              <span className="font-bold">Error:</span> {errorMsg}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* General Info */}
             <div className="p-6 rounded-2xl bg-white border border-slate-200 space-y-4 shadow-xs">
@@ -149,11 +155,13 @@ export default function NewProductPage() {
                     onChange={(e) => setCategoryId(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900"
                   >
-                    {MOCK_CATEGORIES.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
+                    <option value="cat-tshirts">T-Shirts</option>
+                    <option value="cat-shirts">Shirts</option>
+                    <option value="cat-jeans">Jeans</option>
+                    <option value="cat-trousers">Trousers</option>
+                    <option value="cat-jackets">Jackets</option>
+                    <option value="cat-hoodies">Hoodies</option>
+                    <option value="cat-shorts">Shorts</option>
                   </select>
                 </div>
 
@@ -279,9 +287,10 @@ export default function NewProductPage() {
 
             <button
               type="submit"
-              className="py-3.5 px-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider shadow-md transition-all"
+              disabled={isSubmitting}
+              className="py-3.5 px-8 rounded-xl bg-slate-950 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2"
             >
-              Publish Garment to Catalog
+              {isSubmitting ? 'Publishing Garment...' : 'Publish Garment to Catalog'}
             </button>
           </form>
         </main>

@@ -263,6 +263,18 @@ export class ProductService {
     const slug = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     const newId = `prod-${Date.now()}`;
 
+    // Normalize category ID for Supabase & DB foreign key integrity
+    const catMap: Record<string, string> = {
+      'cat-1': 'cat-tshirts',
+      'cat-2': 'cat-shirts',
+      'cat-3': 'cat-jeans',
+      'cat-4': 'cat-trousers',
+      'cat-5': 'cat-jackets',
+      'cat-6': 'cat-hoodies',
+      'cat-7': 'cat-shorts',
+    };
+    const resolvedCatId = catMap[data.categoryId] || data.categoryId;
+
     // Persist to Supabase directly if available
     if (supabase) {
       try {
@@ -273,7 +285,7 @@ export class ProductService {
           description: data.description,
           price: data.price,
           discount_price: data.discountPrice,
-          category_id: data.categoryId,
+          category_id: resolvedCatId,
           brand: data.brand || 'Vanguard',
           is_featured: data.isFeatured || false,
           is_active: true,
@@ -314,7 +326,7 @@ export class ProductService {
           description: data.description,
           price: data.price,
           discountPrice: data.discountPrice,
-          categoryId: data.categoryId,
+          categoryId: resolvedCatId,
           brand: data.brand || 'Vanguard',
           isFeatured: data.isFeatured || false,
           images: {
