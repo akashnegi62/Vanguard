@@ -53,7 +53,7 @@ export default function AdminProductsPage() {
   );
 
   return (
-    <div className="flex min-h-screen bg-obsidian-950 text-obsidian-100">
+    <div className="flex min-h-screen bg-slate-50 text-slate-900">
       <AdminSidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -63,7 +63,7 @@ export default function AdminProductsPage() {
           action={
             <Link
               href="/admin/products/new"
-              className="py-2.5 px-4 rounded-xl bg-brand-500 hover:bg-brand-400 text-obsidian-950 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg"
+              className="py-2.5 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm"
             >
               <Plus className="w-4 h-4" /> Add New Garment
             </Link>
@@ -79,29 +79,29 @@ export default function AdminProductsPage() {
                 placeholder="Search products by title or brand..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-obsidian-900 border border-obsidian-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-obsidian-500 focus:outline-none focus:border-brand-500"
+                className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 shadow-2xs"
               />
-              <Search className="w-4 h-4 text-obsidian-400 absolute left-3.5 top-3" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
-            <span className="text-xs text-obsidian-400 font-mono">
-              Total Products: <span className="text-white font-bold">{filtered.length}</span>
+            <span className="text-xs text-slate-500 font-mono">
+              Total Products: <span className="text-slate-900 font-bold">{filtered.length}</span>
             </span>
           </div>
 
           {/* Table */}
-          <div className="bg-obsidian-900/40 border border-obsidian-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
             {isLoading ? (
-              <div className="py-20 text-center text-xs text-obsidian-400">
+              <div className="py-20 text-center text-xs text-slate-500">
                 Loading product records...
               </div>
             ) : filtered.length === 0 ? (
-              <div className="py-20 text-center text-xs text-obsidian-400">
+              <div className="py-20 text-center text-xs text-slate-500">
                 No garments found matching criteria.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-obsidian-900/90 text-obsidian-400 uppercase tracking-wider font-bold border-b border-obsidian-800">
+                  <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold border-b border-slate-200">
                     <tr>
                       <th className="py-3.5 px-4">Garment</th>
                       <th className="py-3.5 px-4">Brand</th>
@@ -111,17 +111,17 @@ export default function AdminProductsPage() {
                       <th className="py-3.5 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-obsidian-800/60">
+                  <tbody className="divide-y divide-slate-100">
                     {filtered.map((product) => {
                       const image = product.images?.[0]?.imageUrl || '';
                       return (
                         <tr
                           key={product.id}
-                          className="hover:bg-obsidian-800/30 transition-colors"
+                          className="hover:bg-slate-50 transition-colors"
                         >
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
-                              <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-obsidian-950 shrink-0">
+                              <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                                 {image && (
                                   <Image
                                     src={image}
@@ -132,24 +132,24 @@ export default function AdminProductsPage() {
                                 )}
                               </div>
                               <div>
-                                <span className="font-bold text-white block max-w-xs truncate">
+                                <span className="font-bold text-slate-950 block max-w-xs truncate">
                                   {product.name}
                                 </span>
-                                <span className="text-[10px] text-obsidian-500 font-mono">
+                                <span className="text-[10px] text-slate-400 font-mono">
                                   {product.slug}
                                 </span>
                               </div>
                             </div>
                           </td>
-                          <td className="py-3 px-4 text-obsidian-300 font-medium">
+                          <td className="py-3 px-4 text-slate-600 font-medium">
                             {product.brand}
                           </td>
                           <td className="py-3 px-4">
-                            <span className="font-mono text-white font-bold">
+                            <span className="font-mono text-slate-950 font-bold">
                               {formatPrice(product.discountPrice || product.price)}
                             </span>
                             {product.discountPrice && (
-                              <span className="block text-[10px] text-obsidian-500 line-through">
+                              <span className="block text-[10px] text-slate-400 line-through">
                                 {formatPrice(product.price)}
                               </span>
                             )}
@@ -158,8 +158,8 @@ export default function AdminProductsPage() {
                             <span
                               className={`font-mono font-bold ${
                                 (product.totalStock || 0) > 10
-                                  ? 'text-emerald-400'
-                                  : 'text-amber-400'
+                                  ? 'text-emerald-700'
+                                  : 'text-amber-700'
                               }`}
                             >
                               {product.totalStock || 25} in stock
@@ -170,8 +170,8 @@ export default function AdminProductsPage() {
                               onClick={() => handleToggleActive(product.id)}
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase transition-colors ${
                                 product.isActive
-                                  ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                                  : 'bg-obsidian-800 text-obsidian-400 border border-obsidian-700'
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                  : 'bg-slate-100 text-slate-500 border border-slate-200'
                               }`}
                             >
                               {product.isActive ? (
@@ -189,14 +189,14 @@ export default function AdminProductsPage() {
                             <div className="flex items-center justify-end gap-2">
                               <Link
                                 href={`/admin/products/${product.id}/edit`}
-                                className="p-1.5 rounded-lg bg-obsidian-800 hover:bg-obsidian-700 text-obsidian-300 hover:text-white transition-colors"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors border border-slate-200"
                                 title="Edit"
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
                               </Link>
                               <button
                                 onClick={() => handleDelete(product.id)}
-                                className="p-1.5 rounded-lg bg-obsidian-800 hover:bg-red-950/80 text-obsidian-300 hover:text-red-400 transition-colors"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors border border-slate-200"
                                 title="Delete"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />

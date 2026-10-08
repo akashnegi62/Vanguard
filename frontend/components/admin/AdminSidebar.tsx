@@ -9,8 +9,7 @@ import {
   Layers, 
   ClipboardList, 
   Users, 
-  ArrowLeft,
-  ShieldAlert
+  ArrowLeft
 } from 'lucide-react';
 
 const LINKS = [
@@ -25,14 +24,14 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-obsidian-950 border-r border-obsidian-900 flex flex-col shrink-0 min-h-screen">
+    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 min-h-screen">
       {/* Brand / Logo */}
-      <div className="h-20 px-6 flex items-center justify-between border-b border-obsidian-900">
+      <div className="h-20 px-6 flex items-center justify-between border-b border-slate-200">
         <Link href="/admin" className="flex items-center gap-2">
-          <span className="font-display text-xl font-black tracking-widest text-white uppercase">
+          <span className="font-display text-xl font-black tracking-widest text-slate-950 uppercase">
             VANGUARD
           </span>
-          <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-brand-500 text-obsidian-950">
+          <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-300">
             Admin
           </span>
         </Link>
@@ -51,10 +50,10 @@ export default function AdminSidebar() {
             <Link
               key={link.name}
               href={link.href}
-              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${
+              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
                 isActive
-                  ? 'bg-brand-500 text-obsidian-950 font-bold shadow-lg shadow-brand-500/10'
-                  : 'text-obsidian-400 hover:text-white hover:bg-obsidian-900'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-950 hover:bg-slate-50'
               }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
@@ -65,10 +64,10 @@ export default function AdminSidebar() {
       </nav>
 
       {/* Return to Storefront link */}
-      <div className="p-4 border-t border-obsidian-900">
+      <div className="p-4 border-t border-slate-200">
         <Link
           href="/"
-          className="flex items-center gap-2 text-xs text-obsidian-400 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-obsidian-900"
+          className="flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors px-3 py-2 rounded-lg hover:bg-slate-50"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Exit to Customer Store</span>

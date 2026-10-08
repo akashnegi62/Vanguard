@@ -27,23 +27,23 @@ export default function CartPage() {
   const total = getTotal();
 
   return (
-    <div className="flex flex-col min-h-screen bg-obsidian-950 text-obsidian-100">
+    <div className="flex flex-col min-h-screen bg-white text-slate-900">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <div className="flex items-center justify-between pb-6 border-b border-obsidian-800 mb-8">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+        <div className="flex items-center justify-between pb-6 border-b border-slate-200 mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold text-white uppercase tracking-tight font-display">
+            <h1 className="text-3xl font-black text-slate-950 uppercase tracking-tight font-display">
               Shopping Bag
             </h1>
-            <p className="text-xs text-obsidian-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1 font-medium">
               Review your selected garments before proceeding to secure checkout.
             </p>
           </div>
           {items.length > 0 && (
             <button
               onClick={clearCart}
-              className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 transition-colors"
+              className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" /> Empty Bag
             </button>
@@ -51,25 +51,25 @@ export default function CartPage() {
         </div>
 
         {items.length === 0 ? (
-          <div className="text-center py-24 bg-obsidian-900/30 rounded-2xl border border-obsidian-800/60 max-w-xl mx-auto p-8">
-            <div className="w-16 h-16 rounded-full bg-obsidian-800 text-obsidian-400 flex items-center justify-center mx-auto mb-4">
-              <ShoppingBag className="w-8 h-8" />
+          <div className="text-center py-20 bg-slate-50 rounded-2xl border border-slate-200 max-w-xl mx-auto p-8 shadow-xs">
+            <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center mx-auto mb-4 border border-slate-200">
+              <ShoppingBag className="w-7 h-7" />
             </div>
-            <h2 className="text-xl font-bold text-white uppercase tracking-wide">
+            <h2 className="text-lg font-bold text-slate-950 uppercase tracking-wide">
               Your Shopping Bag is Empty
             </h2>
-            <p className="text-xs text-obsidian-400 mt-2 max-w-sm mx-auto leading-relaxed mb-6">
+            <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed mb-6">
               Looks like you haven't added any garments to your bag yet. Explore our curated archives for menswear essentials.
             </p>
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-brand-400 hover:bg-brand-500 text-obsidian-950 font-bold text-xs uppercase tracking-wider transition-all"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md"
             >
               Explore Collection <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             {/* Items List */}
             <div className="lg:col-span-2 space-y-4">
               {items.map((item) => {
@@ -81,10 +81,10 @@ export default function CartPage() {
                 return (
                   <div
                     key={item.id}
-                    className="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl bg-obsidian-900/40 border border-obsidian-800/80 hover:border-obsidian-700 transition-all"
+                    className="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 transition-all shadow-xs"
                   >
                     {/* Thumbnail */}
-                    <div className="relative w-full sm:w-28 aspect-[3/4] sm:aspect-square rounded-xl overflow-hidden bg-obsidian-950 shrink-0">
+                    <div className="relative w-full sm:w-28 aspect-[3/4] sm:aspect-square rounded-xl overflow-hidden bg-slate-100 shrink-0">
                       <Image
                         src={imageSrc}
                         alt={item.product.name}
@@ -98,49 +98,49 @@ export default function CartPage() {
                       <div>
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <span className="text-[10px] font-mono uppercase text-brand-400 font-bold">
+                            <span className="text-[10px] uppercase font-bold text-slate-500">
                               {item.product.brand}
                             </span>
-                            <h3 className="text-sm sm:text-base font-bold text-white hover:text-brand-300 transition-colors">
+                            <h3 className="text-sm sm:text-base font-bold text-slate-950 hover:text-slate-600 transition-colors">
                               <Link href={`/products/${item.product.slug}`}>
                                 {item.product.name}
                               </Link>
                             </h3>
                           </div>
-                          <span className="text-base font-extrabold text-white">
+                          <span className="text-base font-black text-slate-950 font-mono">
                             {formatPrice(itemPrice * item.quantity)}
                           </span>
                         </div>
 
                         {/* Variant details */}
-                        <div className="flex items-center gap-3 mt-2 text-xs text-obsidian-400">
-                          <span className="px-2 py-0.5 rounded bg-obsidian-800 text-obsidian-200 border border-obsidian-700 font-mono">
+                        <div className="flex items-center gap-2 mt-2 text-xs">
+                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 font-mono text-[11px] font-semibold">
                             Size: {item.variant.size}
                           </span>
-                          <span className="px-2 py-0.5 rounded bg-obsidian-800 text-obsidian-200 border border-obsidian-700">
+                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-semibold">
                             Color: {item.variant.color}
                           </span>
-                          <span className="text-[11px] text-obsidian-500">
+                          <span className="text-[11px] text-slate-400 font-mono">
                             {formatPrice(itemPrice)} each
                           </span>
                         </div>
                       </div>
 
                       {/* Bottom actions: stepper and remove */}
-                      <div className="flex items-center justify-between pt-4 mt-2 border-t border-obsidian-800/60">
-                        <div className="flex items-center border border-obsidian-800 bg-obsidian-900 rounded-lg overflow-hidden">
+                      <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100">
+                        <div className="flex items-center border border-slate-200 bg-white rounded-lg overflow-hidden shadow-2xs">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="px-3 py-1.5 text-xs text-obsidian-300 hover:text-white"
+                            className="px-3 py-1.5 text-xs text-slate-600 hover:text-slate-950 hover:bg-slate-50"
                           >
                             -
                           </button>
-                          <span className="px-3 text-xs font-mono font-bold text-white">
+                          <span className="px-3 text-xs font-mono font-bold text-slate-900">
                             {item.quantity}
                           </span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="px-3 py-1.5 text-xs text-obsidian-300 hover:text-white"
+                            className="px-3 py-1.5 text-xs text-slate-600 hover:text-slate-950 hover:bg-slate-50"
                           >
                             +
                           </button>
@@ -148,7 +148,7 @@ export default function CartPage() {
 
                         <button
                           onClick={() => removeItem(item.id)}
-                          className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 transition-colors"
+                          className="text-xs font-semibold text-red-600 hover:text-red-700 flex items-center gap-1 transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" /> Remove
                         </button>
@@ -161,29 +161,29 @@ export default function CartPage() {
 
             {/* Cart Summary */}
             <div className="space-y-6">
-              <div className="p-6 rounded-2xl bg-obsidian-900/60 border border-obsidian-800 space-y-4">
-                <h3 className="font-bold text-sm uppercase tracking-wider text-white border-b border-obsidian-800 pb-3">
+              <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 shadow-xs">
+                <h3 className="font-bold text-xs uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-3">
                   Order Summary
                 </h3>
 
                 <div className="space-y-2.5 text-xs">
-                  <div className="flex items-center justify-between text-obsidian-300">
+                  <div className="flex items-center justify-between text-slate-600">
                     <span>Subtotal</span>
-                    <span className="font-mono text-white">{formatPrice(subtotal)}</span>
+                    <span className="font-mono text-slate-950 font-bold">{formatPrice(subtotal)}</span>
                   </div>
 
                   {discount > 0 && (
-                    <div className="flex items-center justify-between text-emerald-400">
+                    <div className="flex items-center justify-between text-emerald-700">
                       <span>Total Savings</span>
-                      <span className="font-mono">- {formatPrice(discount)}</span>
+                      <span className="font-mono font-bold">- {formatPrice(discount)}</span>
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between text-obsidian-300">
+                  <div className="flex items-center justify-between text-slate-600">
                     <span>Estimated Shipping</span>
-                    <span className="font-mono text-white">
+                    <span className="font-mono text-slate-950 font-bold">
                       {shipping === 0 ? (
-                        <span className="text-emerald-400 font-bold uppercase">Free</span>
+                        <span className="text-emerald-700 font-bold uppercase">Free</span>
                       ) : (
                         formatPrice(shipping)
                       )}
@@ -191,37 +191,37 @@ export default function CartPage() {
                   </div>
 
                   {subtotal < 1999 && (
-                    <p className="text-[11px] text-brand-300/80 bg-brand-950/40 p-2 rounded border border-brand-900/60">
+                    <p className="text-[11px] text-slate-600 bg-white p-2.5 rounded-lg border border-slate-200">
                       Add {formatPrice(1999 - subtotal)} more to qualify for complimentary express delivery!
                     </p>
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-obsidian-800 flex items-baseline justify-between">
-                  <span className="text-sm font-bold text-white uppercase tracking-wider">
+                <div className="pt-3 border-t border-slate-200 flex items-baseline justify-between">
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                     Total Due
                   </span>
-                  <span className="text-xl font-extrabold text-white font-mono">
+                  <span className="text-xl font-black text-slate-950 font-mono">
                     {formatPrice(total)}
                   </span>
                 </div>
 
                 <Link
                   href="/checkout"
-                  className="w-full py-4 rounded-xl bg-white hover:bg-brand-300 text-obsidian-950 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xl shadow-white/5"
+                  className="w-full py-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md"
                 >
                   Proceed to Checkout <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
 
               {/* Guarantees Box */}
-              <div className="p-5 rounded-2xl bg-obsidian-900/30 border border-obsidian-800/60 space-y-3 text-xs text-obsidian-400">
+              <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-3 text-xs text-slate-600 shadow-xs">
                 <div className="flex items-center gap-3">
-                  <Truck className="w-4 h-4 text-brand-400" />
+                  <Truck className="w-4 h-4 text-slate-800 shrink-0" />
                   <span>Free express delivery on orders over ₹1,999</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <ShieldCheck className="w-4 h-4 text-brand-400" />
+                  <ShieldCheck className="w-4 h-4 text-slate-800 shrink-0" />
                   <span>All payments encrypted with SSL standard</span>
                 </div>
               </div>

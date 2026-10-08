@@ -41,52 +41,52 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-obsidian-950 text-obsidian-100">
+    <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900">
       <Navbar />
 
       <main className="flex-1 flex items-center justify-center py-16 px-4">
-        <div className="w-full max-w-md bg-obsidian-900/60 p-8 rounded-3xl border border-obsidian-800 shadow-2xl backdrop-blur-xl space-y-6">
+        <div className="w-full max-w-md bg-white p-8 rounded-3xl border border-slate-200 shadow-xl space-y-6">
           <div className="text-center space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white uppercase tracking-tight font-display">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-950 uppercase tracking-tight font-display">
               Client Sign In
             </h1>
-            <p className="text-xs text-obsidian-400">
+            <p className="text-xs text-slate-500 font-medium">
               Access your personal wardrobe, order archives, and wishlist.
             </p>
           </div>
 
           {(error || localError) && (
-            <div className="p-3.5 bg-red-950/80 border border-red-800 text-red-200 text-xs rounded-xl">
+            <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
               {error || localError}
             </div>
           )}
 
           {/* Quick Demo Fill Buttons */}
-          <div className="p-4 bg-obsidian-950/80 rounded-2xl border border-obsidian-800 space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-400 block text-center">
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 block text-center">
               Evaluation & Demo Instant Logins
             </span>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={handleDemoUser}
-                className="py-2 px-3 rounded-lg bg-obsidian-800 hover:bg-obsidian-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors border border-obsidian-700"
+                className="py-2 px-3 rounded-lg bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors border border-slate-200 shadow-2xs"
               >
-                <UserCheck className="w-3.5 h-3.5 text-brand-400" /> Customer
+                <UserCheck className="w-3.5 h-3.5 text-slate-700" /> Customer
               </button>
               <button
                 type="button"
                 onClick={handleDemoAdmin}
-                className="py-2 px-3 rounded-lg bg-brand-900/80 hover:bg-brand-800 text-brand-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors border border-brand-700/60"
+                className="py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-brand-300" /> Admin
+                <ShieldCheck className="w-3.5 h-3.5 text-white" /> Admin
               </button>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-xs text-obsidian-400 block mb-1 font-medium">
+              <label className="text-xs text-slate-600 block mb-1 font-semibold">
                 Email Address
               </label>
               <div className="relative">
@@ -96,16 +96,16 @@ export default function LoginPage() {
                   placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-obsidian-900 border border-obsidian-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-obsidian-600 focus:outline-none focus:border-brand-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-slate-900"
                 />
-                <Mail className="w-4 h-4 text-obsidian-500 absolute left-3.5 top-3" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs text-obsidian-400 font-medium">Password</label>
-                <span className="text-[11px] text-brand-400 hover:underline cursor-pointer">
+                <label className="text-xs text-slate-600 font-semibold">Password</label>
+                <span className="text-[11px] text-slate-500 hover:text-slate-900 hover:underline cursor-pointer">
                   Forgot password?
                 </span>
               </div>
@@ -116,24 +116,24 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-obsidian-900 border border-obsidian-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-obsidian-600 focus:outline-none focus:border-brand-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-slate-900"
                 />
-                <Lock className="w-4 h-4 text-obsidian-500 absolute left-3.5 top-3" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 rounded-xl bg-white hover:bg-brand-300 text-obsidian-950 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xl shadow-white/5"
+              className="w-full py-3.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md"
             >
               {isLoading ? 'Verifying...' : 'Sign In'} <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="text-center pt-2 text-xs text-obsidian-400">
+          <div className="text-center pt-2 text-xs text-slate-500">
             Do not have an account?{' '}
-            <Link href="/register" className="text-brand-300 font-semibold hover:underline">
+            <Link href="/register" className="text-slate-950 font-bold hover:underline">
               Create an account
             </Link>
           </div>

@@ -65,7 +65,7 @@ export default function AdminOrdersPage() {
   });
 
   return (
-    <div className="flex min-h-screen bg-obsidian-950 text-obsidian-100">
+    <div className="flex min-h-screen bg-slate-50 text-slate-900">
       <AdminSidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -83,19 +83,19 @@ export default function AdminOrdersPage() {
                 placeholder="Search orders by ID or customer..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-obsidian-900 border border-obsidian-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-obsidian-500 focus:outline-none focus:border-brand-500"
+                className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 shadow-2xs"
               />
-              <Search className="w-4 h-4 text-obsidian-400 absolute left-3.5 top-3" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <span className="text-xs text-obsidian-400 uppercase tracking-wider font-semibold">
+              <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
                 Status:
               </span>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-obsidian-900 border border-obsidian-800 text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-brand-500"
+                className="bg-white border border-slate-300 text-xs text-slate-900 font-semibold rounded-lg px-3 py-2 focus:outline-none focus:border-slate-900 shadow-2xs"
               >
                 <option value="ALL">All Statuses</option>
                 {ORDER_STATUSES.map((s) => (
@@ -108,9 +108,9 @@ export default function AdminOrdersPage() {
           </div>
 
           {/* Orders Table */}
-          <div className="bg-obsidian-900/40 border border-obsidian-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
             <table className="w-full text-left text-xs">
-              <thead className="bg-obsidian-900/90 text-obsidian-400 uppercase tracking-wider font-bold border-b border-obsidian-800">
+              <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold border-b border-slate-200">
                 <tr>
                   <th className="py-3.5 px-4">Order ID</th>
                   <th className="py-3.5 px-4">Customer</th>
@@ -121,24 +121,24 @@ export default function AdminOrdersPage() {
                   <th className="py-3.5 px-4 text-right">View</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-obsidian-800/60">
+              <tbody className="divide-y divide-slate-100">
                 {filtered.map((order) => (
-                  <tr key={order.id} className="hover:bg-obsidian-800/30 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-white uppercase">
+                  <tr key={order.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3.5 px-4 font-mono font-bold text-slate-950 uppercase">
                       #{order.id}
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="font-bold text-white block">
+                      <span className="font-bold text-slate-950 block">
                         {order.user?.name || 'Customer'}
                       </span>
-                      <span className="text-[10px] text-obsidian-500">
+                      <span className="text-[10px] text-slate-400">
                         {order.user?.email || 'N/A'}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-obsidian-400">
+                    <td className="py-3.5 px-4 text-slate-500">
                       {formatDate(order.createdAt)}
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-white font-bold">
+                    <td className="py-3.5 px-4 font-mono text-slate-950 font-bold">
                       {formatPrice(order.totalAmount)}
                     </td>
                     <td className="py-3.5 px-4">
@@ -147,10 +147,10 @@ export default function AdminOrdersPage() {
                         onChange={(e) =>
                           handleUpdatePaymentStatus(order.id, e.target.value as PaymentStatus)
                         }
-                        className={`text-[10px] font-bold uppercase rounded px-2 py-1 border bg-obsidian-950 focus:outline-none ${
+                        className={`text-[10px] font-bold uppercase rounded px-2 py-1 border bg-white focus:outline-none ${
                           order.paymentStatus === 'PAID'
-                            ? 'text-emerald-400 border-emerald-800'
-                            : 'text-amber-400 border-amber-800'
+                            ? 'text-emerald-700 border-emerald-200'
+                            : 'text-amber-700 border-amber-200'
                         }`}
                       >
                         {PAYMENT_STATUSES.map((ps) => (
@@ -166,7 +166,7 @@ export default function AdminOrdersPage() {
                         onChange={(e) =>
                           handleUpdateStatus(order.id, e.target.value as OrderStatus)
                         }
-                        className="text-[10px] font-bold uppercase rounded px-2 py-1 border bg-obsidian-950 border-obsidian-700 text-white focus:outline-none focus:border-brand-500"
+                        className="text-[10px] font-bold uppercase rounded px-2 py-1 border bg-white border-slate-300 text-slate-800 focus:outline-none focus:border-slate-900"
                       >
                         {ORDER_STATUSES.map((os) => (
                           <option key={os} value={os}>
@@ -178,7 +178,7 @@ export default function AdminOrdersPage() {
                     <td className="py-3.5 px-4 text-right">
                       <Link
                         href={`/orders/${order.id}`}
-                        className="p-1.5 rounded-lg bg-obsidian-800 hover:bg-obsidian-700 text-obsidian-300 hover:text-white inline-flex items-center"
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 inline-flex items-center border border-slate-200"
                         title="View order"
                       >
                         <Eye className="w-3.5 h-3.5" />

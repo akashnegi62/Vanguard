@@ -83,7 +83,6 @@ function ProductsContent() {
         params.set(key, String(val));
       }
     });
-    // Reset to page 1 on filter changes
     if (!newParams.page) {
       params.delete('page');
     }
@@ -95,14 +94,14 @@ function ProductsContent() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       {/* Header Banner */}
       <div className="mb-8">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white uppercase tracking-tight font-display">
+        <h1 className="text-3xl sm:text-4xl font-black text-slate-950 uppercase tracking-tight font-display">
           {category ? category.replace('-', ' ') : 'All Collections'}
         </h1>
-        <p className="text-sm text-obsidian-400 mt-2">
-          {search ? `Search results for "${search}"` : 'Handcrafted garments engineered with artisanal fabrics.'}
+        <p className="text-xs sm:text-sm text-slate-500 mt-1.5 font-medium">
+          {search ? `Search results for "${search}"` : 'Artisanal menswear engineered with heavyweight textiles.'}
         </p>
       </div>
 
@@ -123,14 +122,14 @@ function ProductsContent() {
         />
 
         {/* Main Product Area */}
-        <div className="flex-1">
-          {/* Mobile Filter Toggle & Sort */}
+        <div className="flex-1 min-w-0">
+          {/* Mobile Filter Toggle Button */}
           <div className="flex items-center justify-between gap-4 mb-4 lg:hidden">
             <button
               onClick={() => setIsMobileFilterOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-obsidian-900 border border-obsidian-800 rounded-lg text-xs font-bold text-white uppercase"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 uppercase shadow-xs"
             >
-              <Filter className="w-4 h-4 text-brand-400" /> Filters
+              <Filter className="w-4 h-4 text-slate-600" /> Filters
             </button>
           </div>
 
@@ -146,25 +145,25 @@ function ProductsContent() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-3 mt-12 pt-6 border-t border-obsidian-900">
+            <div className="flex items-center justify-center gap-3 mt-12 pt-6 border-t border-slate-200">
               <button
                 disabled={page <= 1}
                 onClick={() => updateFilters({ page: page - 1 })}
-                className="p-2 rounded-lg bg-obsidian-900 border border-obsidian-800 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-obsidian-800 transition-colors"
+                className="p-2 rounded-lg bg-white border border-slate-300 text-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors shadow-xs"
                 title="Previous Page"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
-              <span className="text-xs text-obsidian-300 font-mono">
-                Page <span className="text-white font-bold">{page}</span> of {totalPages}
+              <span className="text-xs text-slate-600 font-mono">
+                Page <span className="text-slate-900 font-bold">{page}</span> of {totalPages}
               </span>
               <button
                 disabled={page >= totalPages}
                 onClick={() => updateFilters({ page: page + 1 })}
-                className="p-2 rounded-lg bg-obsidian-900 border border-obsidian-800 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-obsidian-800 transition-colors"
+                className="p-2 rounded-lg bg-white border border-slate-300 text-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors shadow-xs"
                 title="Next Page"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -176,10 +175,10 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-obsidian-950 text-obsidian-100">
+    <div className="flex flex-col min-h-screen bg-white text-slate-900">
       <Navbar />
       <main className="flex-1">
-        <Suspense fallback={<div className="p-12 text-center text-obsidian-400">Loading catalog...</div>}>
+        <Suspense fallback={<div className="p-12 text-center text-slate-500">Loading catalog...</div>}>
           <ProductsContent />
         </Suspense>
       </main>

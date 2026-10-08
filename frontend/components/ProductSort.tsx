@@ -23,21 +23,21 @@ export default function ProductSort({
   totalResults,
 }: ProductSortProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-obsidian-800">
-      <div className="text-xs text-obsidian-400">
-        Showing <span className="font-bold text-white">{totalResults}</span> curated garments
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
+      <div className="text-xs text-slate-500 font-medium">
+        Showing <span className="font-bold text-slate-900">{totalResults}</span> curated garments
       </div>
 
       <div className="flex items-center gap-2">
-        <ArrowUpDown className="w-4 h-4 text-obsidian-400 shrink-0" />
-        <span className="text-xs text-obsidian-400 uppercase tracking-wider font-semibold">
+        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+        <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
           Sort By:
         </span>
         <select
           value={currentSort}
           onChange={(e) => onSortChange(e.target.value)}
           aria-label="Sort garments by"
-          className="bg-obsidian-900 border border-obsidian-800 text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-brand-500 cursor-pointer"
+          className="bg-white border border-slate-300 text-xs text-slate-900 font-medium rounded-lg px-3 py-1.5 focus:outline-none focus:border-slate-900 cursor-pointer shadow-xs"
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>

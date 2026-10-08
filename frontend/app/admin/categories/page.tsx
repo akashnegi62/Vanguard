@@ -7,7 +7,7 @@ import AdminHeader from '@/components/admin/AdminHeader';
 import { MOCK_CATEGORIES } from '@/lib/mockData';
 import { Category } from '@/types';
 import { slugify } from '@/lib/utils';
-import { Plus, Edit3, Trash2, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, XCircle } from 'lucide-react';
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
@@ -48,7 +48,7 @@ export default function AdminCategoriesPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-obsidian-950 text-obsidian-100">
+    <div className="flex min-h-screen bg-slate-50 text-slate-900">
       <AdminSidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -58,7 +58,7 @@ export default function AdminCategoriesPage() {
           action={
             <button
               onClick={() => setIsModalOpen(true)}
-              className="py-2.5 px-4 rounded-xl bg-brand-500 hover:bg-brand-400 text-obsidian-950 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-lg"
+              className="py-2.5 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm"
             >
               <Plus className="w-4 h-4" /> Add Department
             </button>
@@ -66,9 +66,9 @@ export default function AdminCategoriesPage() {
         />
 
         <main className="flex-1 p-8 space-y-6 overflow-y-auto">
-          <div className="bg-obsidian-900/40 border border-obsidian-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
             <table className="w-full text-left text-xs">
-              <thead className="bg-obsidian-900/90 text-obsidian-400 uppercase tracking-wider font-bold border-b border-obsidian-800">
+              <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold border-b border-slate-200">
                 <tr>
                   <th className="py-3.5 px-4">Department</th>
                   <th className="py-3.5 px-4">Slug</th>
@@ -78,29 +78,29 @@ export default function AdminCategoriesPage() {
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-obsidian-800/60">
+              <tbody className="divide-y divide-slate-100">
                 {categories.map((cat) => (
-                  <tr key={cat.id} className="hover:bg-obsidian-800/30 transition-colors">
+                  <tr key={cat.id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         {cat.imageUrl && (
-                          <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-obsidian-950 shrink-0">
+                          <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                             <Image src={cat.imageUrl} alt={cat.name} fill className="object-cover" />
                           </div>
                         )}
-                        <span className="font-bold text-white text-sm">{cat.name}</span>
+                        <span className="font-bold text-slate-950 text-sm">{cat.name}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 font-mono text-obsidian-400 text-xs">{cat.slug}</td>
-                    <td className="py-3 px-4 text-obsidian-400 max-w-xs truncate">{cat.description}</td>
-                    <td className="py-3 px-4 font-mono font-bold text-white">{cat.productCount || 0}</td>
+                    <td className="py-3 px-4 font-mono text-slate-500 text-xs">{cat.slug}</td>
+                    <td className="py-3 px-4 text-slate-600 max-w-xs truncate">{cat.description}</td>
+                    <td className="py-3 px-4 font-mono font-bold text-slate-950">{cat.productCount || 0}</td>
                     <td className="py-3 px-4">
                       <button
                         onClick={() => handleToggleActive(cat.id)}
                         className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                           cat.isActive
-                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                            : 'bg-obsidian-800 text-obsidian-400 border border-obsidian-700'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-slate-100 text-slate-500 border border-slate-200'
                         }`}
                       >
                         {cat.isActive ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
@@ -110,7 +110,7 @@ export default function AdminCategoriesPage() {
                     <td className="py-3 px-4 text-right">
                       <button
                         onClick={() => handleDelete(cat.id)}
-                        className="p-1.5 rounded-lg bg-obsidian-800 hover:bg-red-950 text-obsidian-300 hover:text-red-400 transition-colors"
+                        className="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors border border-slate-200"
                         title="Delete"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -126,42 +126,42 @@ export default function AdminCategoriesPage() {
 
       {/* Add Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="bg-obsidian-900 border border-obsidian-800 rounded-2xl p-6 w-full max-w-md space-y-4">
-            <h3 className="font-bold text-white uppercase text-sm">Add Category</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+            <h3 className="font-bold text-slate-950 uppercase text-xs">Add Department</h3>
             <form onSubmit={handleCreateCategory} className="space-y-4">
               <div>
-                <label className="text-xs text-obsidian-400 block mb-1">Category Name</label>
+                <label className="text-xs text-slate-600 block mb-1 font-medium">Category Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Overcoats"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-obsidian-950 border border-obsidian-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-obsidian-400 block mb-1">Description</label>
+                <label className="text-xs text-slate-600 block mb-1 font-medium">Description</label>
                 <textarea
                   rows={2}
                   required
                   placeholder="Editorial description of collection..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-obsidian-950 border border-obsidian-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-obsidian-400 block mb-1">Banner Image URL</label>
+                <label className="text-xs text-slate-600 block mb-1 font-medium">Banner Image URL</label>
                 <input
                   type="url"
                   required
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
-                  className="w-full bg-obsidian-950 border border-obsidian-800 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900"
                 />
               </div>
 
@@ -169,13 +169,13 @@ export default function AdminCategoriesPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-obsidian-800 text-obsidian-300 text-xs font-semibold"
+                  className="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-brand-500 text-obsidian-950 text-xs font-bold uppercase"
+                  className="px-5 py-2 rounded-lg bg-slate-950 text-white text-xs font-bold uppercase hover:bg-slate-800"
                 >
                   Create
                 </button>

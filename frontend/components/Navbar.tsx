@@ -12,7 +12,8 @@ import {
   X, 
   ShieldCheck, 
   LogOut, 
-  ChevronDown 
+  ChevronDown,
+  ArrowRight
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
@@ -31,6 +32,7 @@ const CATEGORIES = [
 export default function Navbar() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -41,206 +43,412 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 15);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [mobileMenuOpen]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
       setMobileMenuOpen(false);
+      setMobileSearchOpen(false);
     }
   };
 
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-obsidian-950/90 backdrop-blur-md border-b border-obsidian-800 shadow-xl'
-          : 'bg-obsidian-950 border-b border-obsidian-900'
-      }`}
-    >
-      {/* Top Banner */}
-      <div className="bg-gradient-to-r from-obsidian-900 via-brand-950 to-obsidian-900 border-b border-obsidian-800 text-xs py-1.5 px-4 text-center text-brand-300">
-        <span>Complimentary domestic express shipping on orders over ₹1,999 • Worldwide Delivery</span>
-      </div>
+    <>
+      <header
+        className={`sticky top-0 z-40 transition-all duration-200 ${
+          isScrolled
+            ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200'
+            : 'bg-white border-b border-slate-200'
+        }`}
+      >
+        {/* Top Announcement Bar */}
+        <div className="bg-slate-900 text-white text-[11px] sm:text-xs py-1.5 px-4 text-center font-medium tracking-wide">
+          <span>Complimentary express delivery on all orders over ₹1,999 • Free 14-day returns</span>
+        </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 gap-4">
-          {/* Mobile menu button */}
-          <button
-            type="button"
-            className="md:hidden p-2 text-obsidian-300 hover:text-white"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle navigation"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="font-display text-2xl sm:text-3xl font-extrabold tracking-widest text-white uppercase group-hover:text-brand-300 transition-colors">
-              VANGUARD
-            </span>
-            <span className="text-[10px] tracking-widest uppercase text-brand-400 bg-brand-950/80 px-2 py-0.5 rounded border border-brand-800/60 font-semibold hidden sm:inline-block">
-              Atelier
-            </span>
-          </Link>
-
-          {/* Desktop Category Navigation */}
-          <nav className="hidden lg:flex items-center gap-6">
-            <Link
-              href="/products"
-              className="text-sm font-medium text-obsidian-300 hover:text-brand-300 transition-colors tracking-wide"
-            >
-              All Products
-            </Link>
-            {CATEGORIES.map((cat) => (
-              <Link
-                key={cat.name}
-                href={cat.href}
-                className="text-sm font-medium text-obsidian-400 hover:text-white transition-colors tracking-wide"
+        {/* Main Navbar Bar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
+            {/* Left: Mobile Hamburger Button */}
+            <div className="flex items-center lg:hidden">
+              <button
+                type="button"
+                className="p-2 -ml-2 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Open mobile menu"
               >
-                {cat.name}
+                <Menu className="w-6 h-6" />
+              </button>
+
+              {/* Mobile Search Toggle Icon */}
+              <button
+                type="button"
+                className="p-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg sm:hidden transition-colors"
+                onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+                aria-label="Toggle search"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Brand Logo */}
+            <Link href="/" className="flex items-center gap-1.5 group shrink-0">
+              <span className="font-display text-xl sm:text-2xl md:text-3xl font-black tracking-widest text-slate-950 uppercase group-hover:text-slate-700 transition-colors">
+                VANGUARD
+              </span>
+              <span className="hidden sm:inline-block text-[10px] tracking-widest uppercase text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 font-bold">
+                MENSWEAR
+              </span>
+            </Link>
+
+            {/* Desktop Navigation Links */}
+            <nav className="hidden lg:flex items-center gap-5 xl:gap-7">
+              <Link
+                href="/products"
+                className="text-xs uppercase font-bold tracking-wider text-slate-900 hover:text-brand-600 transition-colors py-2"
+              >
+                All Garments
               </Link>
-            ))}
-          </nav>
+              {CATEGORIES.map((cat) => (
+                <Link
+                  key={cat.name}
+                  href={cat.href}
+                  className="text-xs uppercase font-semibold tracking-wider text-slate-600 hover:text-slate-950 transition-colors py-2"
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </nav>
 
-          {/* Search Bar */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="hidden sm:flex relative items-center flex-1 max-w-xs md:max-w-sm"
-          >
-            <input
-              type="text"
-              placeholder="Search heavyweight tee, jacket, denim..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-obsidian-900/90 text-sm text-obsidian-100 placeholder-obsidian-500 rounded-full pl-10 pr-4 py-2 border border-obsidian-800 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
-            />
-            <Search className="w-4 h-4 text-obsidian-400 absolute left-3.5" />
-          </form>
-
-          {/* Right Action Icons */}
-          <div className="flex items-center gap-3 sm:gap-4">
-            {/* Wishlist Icon */}
-            <Link
-              href="/wishlist"
-              className="relative p-2 text-obsidian-300 hover:text-white transition-colors"
-              title="Wishlist"
+            {/* Desktop Search Bar */}
+            <form
+              onSubmit={handleSearchSubmit}
+              className="hidden sm:flex relative items-center flex-1 max-w-xs md:max-w-sm ml-auto mr-2"
             >
-              <Heart className="w-5 h-5" />
-              {wishlistItems.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-brand-500 text-obsidian-950 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {wishlistItems.length}
-                </span>
-              )}
-            </Link>
+              <input
+                type="text"
+                placeholder="Search t-shirts, jackets, denim..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-50 text-xs text-slate-900 placeholder-slate-400 rounded-full pl-9 pr-4 py-2 border border-slate-200 focus:outline-none focus:bg-white focus:border-slate-900 transition-all"
+              />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
+            </form>
 
-            {/* Cart Icon */}
-            <Link
-              href="/cart"
-              className="relative p-2 text-obsidian-300 hover:text-white transition-colors"
-              title="Cart"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-brand-400 text-obsidian-950 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {cartItemCount}
-                </span>
-              )}
-            </Link>
+            {/* Right Action Icons */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              {/* Wishlist */}
+              <Link
+                href="/wishlist"
+                className="relative p-2 text-slate-700 hover:text-slate-950 hover:bg-slate-100 rounded-full transition-colors"
+                title="Wishlist"
+              >
+                <Heart className="w-5 h-5" />
+                {wishlistItems.length > 0 && (
+                  <span className="absolute 1top-0.5 right-0.5 bg-slate-900 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {wishlistItems.length}
+                  </span>
+                )}
+              </Link>
 
-            {/* User Profile / Auth */}
-            <div className="relative">
-              {user ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    className="flex items-center gap-2 py-1.5 px-3 rounded-full bg-obsidian-900 border border-obsidian-800 hover:border-obsidian-700 text-sm text-obsidian-200"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center text-xs font-bold">
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="hidden md:inline text-xs font-medium max-w-[100px] truncate">
-                      {user.name}
-                    </span>
-                    <ChevronDown className="w-3.5 h-3.5 text-obsidian-400" />
-                  </button>
+              {/* Shopping Bag */}
+              <Link
+                href="/cart"
+                className="relative p-2 text-slate-700 hover:text-slate-950 hover:bg-slate-100 rounded-full transition-colors"
+                title="Shopping Bag"
+              >
+                <ShoppingBag className="w-5 h-5" />
+                {cartItemCount > 0 && (
+                  <span className="absolute top-0.5 right-0.5 bg-slate-900 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Link>
 
-                  {userDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-obsidian-900 border border-obsidian-800 rounded-xl shadow-2xl py-2 z-50">
-                      <div className="px-4 py-2 border-b border-obsidian-800">
-                        <p className="text-xs text-obsidian-400">Signed in as</p>
-                        <p className="text-sm font-semibold text-white truncate">{user.email}</p>
-                        <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded bg-brand-500/20 text-brand-300">
-                          {user.role}
-                        </span>
+              {/* User Dropdown / Auth */}
+              <div className="relative">
+                {user ? (
+                  <div className="relative">
+                    <button
+                      onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                      className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-800 transition-colors border border-slate-200"
+                    >
+                      <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                        {user.name.charAt(0).toUpperCase()}
                       </div>
+                      <span className="hidden md:inline max-w-[80px] truncate">
+                        {user.name}
+                      </span>
+                      <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+                    </button>
 
-                      {user.role === 'ADMIN' && (
+                    {userDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl py-2 z-50">
+                        <div className="px-4 py-2 border-b border-slate-100">
+                          <p className="text-[11px] text-slate-500">Signed in as</p>
+                          <p className="text-xs font-bold text-slate-900 truncate">{user.email}</p>
+                          <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">
+                            {user.role}
+                          </span>
+                        </div>
+
+                        {user.role === 'ADMIN' && (
+                          <Link
+                            href="/admin"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-brand-700 hover:bg-slate-50 transition-colors"
+                          >
+                            <ShieldCheck className="w-4 h-4" /> Admin Portal
+                          </Link>
+                        )}
+
                         <Link
-                          href="/admin"
+                          href="/profile"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-brand-300 hover:bg-obsidian-800 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
                         >
-                          <ShieldCheck className="w-4 h-4" /> Admin Dashboard
+                          <User className="w-4 h-4" /> My Profile
                         </Link>
-                      )}
 
-                      <Link
-                        href="/profile"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-obsidian-300 hover:bg-obsidian-800 transition-colors"
-                      >
-                        <User className="w-4 h-4" /> My Profile
-                      </Link>
+                        <Link
+                          href="/orders"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
+                        >
+                          <ShoppingBag className="w-4 h-4" /> Order History
+                        </Link>
 
-                      <Link
-                        href="/orders"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-obsidian-300 hover:bg-obsidian-800 transition-colors"
-                      >
-                        <ShoppingBag className="w-4 h-4" /> Order History
-                      </Link>
+                        <div className="border-t border-slate-100 my-1" />
 
-                      <Link
-                        href="/wishlist"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-obsidian-300 hover:bg-obsidian-800 transition-colors"
-                      >
-                        <Heart className="w-4 h-4" /> Wishlist
-                      </Link>
+                        <button
+                          onClick={() => {
+                            logout();
+                            setUserDropdownOpen(false);
+                            router.push('/');
+                          }}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors text-left font-medium"
+                        >
+                          <LogOut className="w-4 h-4" /> Sign Out
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <Link
+                      href="/login"
+                      className="text-xs font-semibold text-slate-700 hover:text-slate-950 px-2 sm:px-3 py-1.5 transition-colors"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white px-3 sm:px-4 py-1.5 rounded-full transition-all hidden xs:inline-block"
+                    >
+                      Join
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
-                      <div className="border-t border-obsidian-800 my-1"></div>
+          {/* Collapsible Mobile Search Input (Visible when mobile search icon is toggled) */}
+          {mobileSearchOpen && (
+            <div className="sm:hidden pb-3 pt-1 border-t border-slate-100">
+              <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+                <input
+                  type="text"
+                  placeholder="Search garments..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                  className="w-full bg-slate-50 text-xs text-slate-900 placeholder-slate-400 rounded-lg pl-9 pr-4 py-2 border border-slate-200 focus:outline-none focus:bg-white focus:border-slate-900"
+                />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3" />
+              </form>
+            </div>
+          )}
+        </div>
+      </header>
 
-                      <button
-                        onClick={() => {
-                          logout();
-                          setUserDropdownOpen(false);
-                          router.push('/');
-                        }}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-obsidian-800 transition-colors text-left"
-                      >
-                        <LogOut className="w-4 h-4" /> Sign Out
-                      </button>
-                    </div>
-                  )}
+      {/* Full-Screen Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Drawer Sheet */}
+          <div className="relative w-full max-w-xs sm:max-w-sm bg-white h-full shadow-2xl flex flex-col z-10 overflow-y-auto">
+            {/* Drawer Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <span className="font-display font-black text-xl tracking-widest text-slate-950 uppercase">
+                VANGUARD
+              </span>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Drawer Search */}
+            <div className="p-4 border-b border-slate-100">
+              <form onSubmit={handleSearchSubmit} className="relative">
+                <input
+                  type="text"
+                  placeholder="Search catalog..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-slate-50 text-xs text-slate-900 rounded-lg pl-9 pr-3 py-2 border border-slate-200 focus:outline-none focus:border-slate-900"
+                />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              </form>
+            </div>
+
+            {/* Categories Navigation */}
+            <div className="p-5 flex-1 space-y-4">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                  Departments
+                </p>
+                <div className="space-y-1">
+                  <Link
+                    href="/products"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-2 text-sm font-bold text-slate-900 hover:text-brand-600 border-b border-slate-50"
+                  >
+                    <span>All Garments</span>
+                    <ArrowRight className="w-4 h-4 text-slate-400" />
+                  </Link>
+                  {CATEGORIES.map((cat) => (
+                    <Link
+                      key={cat.name}
+                      href={cat.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between py-2 text-sm font-medium text-slate-700 hover:text-slate-950 border-b border-slate-50"
+                    >
+                      <span>{cat.name}</span>
+                      <ArrowRight className="w-4 h-4 text-slate-300" />
+                    </Link>
+                  ))}
                 </div>
+              </div>
+
+              {/* Customer Account Links */}
+              <div className="pt-2">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                  Account & Orders
+                </p>
+                <div className="space-y-2 text-sm font-medium">
+                  <Link
+                    href="/cart"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-1.5 text-slate-700 hover:text-slate-950"
+                  >
+                    <span>Shopping Bag ({cartItemCount})</span>
+                  </Link>
+                  <Link
+                    href="/wishlist"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-1.5 text-slate-700 hover:text-slate-950"
+                  >
+                    <span>Wishlist ({wishlistItems.length})</span>
+                  </Link>
+                  <Link
+                    href="/orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-1.5 text-slate-700 hover:text-slate-950"
+                  >
+                    <span>My Orders</span>
+                  </Link>
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-1.5 text-brand-700 font-bold"
+                  >
+                    <span>Admin Portal</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Demo Switchers & Auth */}
+            <div className="p-5 bg-slate-50 border-t border-slate-100 space-y-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Evaluation Instant Logins
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    quickLoginAsUser();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="py-2 px-3 text-xs font-bold rounded-lg bg-white border border-slate-200 text-slate-800 shadow-sm hover:bg-slate-100"
+                >
+                  Login as User
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    quickLoginAsAdmin();
+                    setMobileMenuOpen(false);
+                    router.push('/admin');
+                  }}
+                  className="py-2 px-3 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm hover:bg-slate-800"
+                >
+                  Login as Admin
+                </button>
+              </div>
+
+              {user ? (
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2 text-xs font-semibold text-red-600 hover:underline"
+                >
+                  Sign Out
+                </button>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex gap-2 pt-1">
                   <Link
                     href="/login"
-                    className="text-xs sm:text-sm font-medium text-obsidian-300 hover:text-white px-3 py-1.5 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex-1 py-2 text-center text-xs font-semibold text-slate-700 border border-slate-200 rounded-lg bg-white"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/register"
-                    className="text-xs sm:text-sm font-medium bg-brand-400 hover:bg-brand-500 text-obsidian-950 font-semibold px-3 sm:px-4 py-1.5 rounded-full transition-all"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex-1 py-2 text-center text-xs font-bold text-white bg-slate-900 rounded-lg"
                   >
                     Register
                   </Link>
@@ -249,75 +457,7 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-
-        {/* Mobile Search input */}
-        <div className="sm:hidden pb-3">
-          <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-            <input
-              type="text"
-              placeholder="Search men's clothing..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-obsidian-900 text-sm text-obsidian-100 placeholder-obsidian-500 rounded-lg pl-9 pr-4 py-2 border border-obsidian-800 focus:outline-none focus:border-brand-500"
-            />
-            <Search className="w-4 h-4 text-obsidian-400 absolute left-3" />
-          </form>
-        </div>
-      </div>
-
-      {/* Mobile drawer navigation */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-obsidian-950 border-b border-obsidian-800 px-4 pt-2 pb-6 space-y-3">
-          <div className="font-semibold text-xs tracking-wider uppercase text-obsidian-400 pt-2">
-            Categories
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Link
-              href="/products"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-medium text-brand-300 py-1.5"
-            >
-              All Products
-            </Link>
-            {CATEGORIES.map((cat) => (
-              <Link
-                key={cat.name}
-                href={cat.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-sm font-medium text-obsidian-300 hover:text-white py-1.5"
-              >
-                {cat.name}
-              </Link>
-            ))}
-          </div>
-
-          <div className="border-t border-obsidian-800 pt-3">
-            <div className="font-semibold text-xs tracking-wider uppercase text-obsidian-400 mb-2">
-              Quick Switch (Demo)
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  quickLoginAsUser();
-                  setMobileMenuOpen(false);
-                }}
-                className="text-xs bg-obsidian-800 text-obsidian-200 px-3 py-1.5 rounded border border-obsidian-700"
-              >
-                Login as User
-              </button>
-              <button
-                onClick={() => {
-                  quickLoginAsAdmin();
-                  setMobileMenuOpen(false);
-                }}
-                className="text-xs bg-brand-900 text-brand-200 px-3 py-1.5 rounded border border-brand-800"
-              >
-                Login as Admin
-              </button>
-            </div>
-          </div>
-        </div>
       )}
-    </header>
+    </>
   );
 }

@@ -46,7 +46,7 @@ export default function AdminUsersPage() {
   );
 
   return (
-    <div className="flex min-h-screen bg-obsidian-950 text-obsidian-100">
+    <div className="flex min-h-screen bg-slate-50 text-slate-900">
       <AdminSidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -62,14 +62,14 @@ export default function AdminUsersPage() {
               placeholder="Search clients by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-obsidian-900 border border-obsidian-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-obsidian-500 focus:outline-none focus:border-brand-500"
+              className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 shadow-2xs"
             />
-            <Search className="w-4 h-4 text-obsidian-400 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           </div>
 
-          <div className="bg-obsidian-900/40 border border-obsidian-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
             <table className="w-full text-left text-xs">
-              <thead className="bg-obsidian-900/90 text-obsidian-400 uppercase tracking-wider font-bold border-b border-obsidian-800">
+              <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold border-b border-slate-200">
                 <tr>
                   <th className="py-3.5 px-4">User</th>
                   <th className="py-3.5 px-4">Phone</th>
@@ -79,31 +79,31 @@ export default function AdminUsersPage() {
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-obsidian-800/60">
+              <tbody className="divide-y divide-slate-100">
                 {filtered.map((usr) => (
-                  <tr key={usr.id} className="hover:bg-obsidian-800/30 transition-colors">
+                  <tr key={usr.id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-brand-500/20 text-brand-300 font-bold flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-800 font-bold flex items-center justify-center shrink-0">
                           {usr.name.charAt(0)}
                         </div>
                         <div>
-                          <span className="font-bold text-white block">{usr.name}</span>
-                          <span className="text-[10px] text-obsidian-500">{usr.email}</span>
+                          <span className="font-bold text-slate-950 block">{usr.name}</span>
+                          <span className="text-[10px] text-slate-400">{usr.email}</span>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-obsidian-400">
+                    <td className="py-3.5 px-4 text-slate-600">
                       {usr.phone || 'Not provided'}
                     </td>
-                    <td className="py-3.5 px-4 text-obsidian-400">
+                    <td className="py-3.5 px-4 text-slate-500">
                       {formatDate(usr.createdAt)}
                     </td>
                     <td className="py-3.5 px-4">
                       <select
                         value={usr.role}
                         onChange={(e) => handleRoleChange(usr.id, e.target.value as UserRole)}
-                        className="bg-obsidian-950 border border-obsidian-800 text-white rounded px-2 py-1 text-[11px] font-mono focus:outline-none"
+                        className="bg-white border border-slate-300 text-slate-800 rounded px-2 py-1 text-[11px] font-mono focus:outline-none"
                       >
                         <option value="USER">USER</option>
                         <option value="ADMIN">ADMIN</option>
@@ -113,8 +113,8 @@ export default function AdminUsersPage() {
                       <span
                         className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                           usr.isActive
-                            ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                            : 'bg-red-950 text-red-400 border border-red-800'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-red-50 text-red-700 border border-red-200'
                         }`}
                       >
                         {usr.isActive ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
@@ -126,8 +126,8 @@ export default function AdminUsersPage() {
                         onClick={() => handleToggleStatus(usr.id)}
                         className={`text-xs px-3 py-1 rounded-lg border font-semibold transition-colors ${
                           usr.isActive
-                            ? 'border-red-800/80 text-red-400 hover:bg-red-950'
-                            : 'border-emerald-800/80 text-emerald-400 hover:bg-emerald-950'
+                            ? 'border-red-200 text-red-600 hover:bg-red-50'
+                            : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
                         }`}
                       >
                         {usr.isActive ? 'Suspend' : 'Activate'}

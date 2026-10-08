@@ -14,7 +14,7 @@ export default function ProductGrid({ products, isLoading = false }: ProductGrid
         {[...Array(8)].map((_, i) => (
           <div
             key={i}
-            className="aspect-[3/4] rounded-xl bg-obsidian-900 border border-obsidian-800 animate-pulse"
+            className="aspect-[3/4] rounded-xl bg-slate-100 border border-slate-200 animate-pulse"
           />
         ))}
       </div>
@@ -23,10 +23,10 @@ export default function ProductGrid({ products, isLoading = false }: ProductGrid
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-16 px-4 bg-obsidian-900/40 rounded-2xl border border-obsidian-800">
-        <h3 className="text-lg font-bold text-white mb-2">No garments found</h3>
-        <p className="text-sm text-obsidian-400 max-w-md mx-auto">
-          We could not find any products matching your selected criteria. Try adjusting your filters or search terms.
+      <div className="text-center py-16 px-4 bg-slate-50 rounded-2xl border border-slate-200">
+        <h3 className="text-base font-bold text-slate-900 mb-1">No garments found</h3>
+        <p className="text-xs text-slate-500 max-w-md mx-auto">
+          We could not find any garments matching your selected criteria. Try adjusting your filters or search terms.
         </p>
       </div>
     );
