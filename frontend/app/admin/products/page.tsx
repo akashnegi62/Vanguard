@@ -34,8 +34,13 @@ export default function AdminProductsPage() {
       });
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you wish to delete this garment from the active catalog?')) {
+      try {
+        await api.deleteProduct(id);
+      } catch (e) {
+        console.warn('Delete product API:', e);
+      }
       setProducts(products.filter((p) => p.id !== id));
     }
   };

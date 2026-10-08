@@ -1,4 +1,5 @@
 import { isDatabaseConnected, prisma } from '../config/database';
+import { supabase } from '../config/supabase';
 import { mockStore, MockProduct } from './mockStore';
 import { ProductFilterQuery } from '../types';
 
@@ -62,6 +63,70 @@ export class ProductService {
           totalPages: Math.ceil(total / limit),
         },
       };
+    }
+
+    // Try Supabase directly
+    if (supabase) {
+      try {
+        let q = supabase
+          .from('products')
+          .select('*, images:product_images(*), variants:product_variants(*), category:categories(*)', { count: 'exact' })
+          .eq('is_active', true);
+
+        if (query.search) q = q.ilike('name', `%${query.search}%`);
+        if (query.featured === 'true') q = q.eq('is_featured', true);
+        if (query.minPrice) q = q.gte('price', parseFloat(query.minPrice));
+        if (query.maxPrice) q = q.lte('price', parseFloat(query.maxPrice));
+        if (query.sort === 'price_asc') q = q.order('price', { ascending: true });
+        else if (query.sort === 'price_desc') q = q.order('price', { ascending: false });
+        else q = q.order('created_at', { ascending: false });
+
+        const { data: sbProds, count: sbCount, error } = await q.range(skip, skip + limit - 1);
+        if (!error && sbProds && sbProds.length > 0) {
+          const mapped = sbProds.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            description: p.description,
+            price: Number(p.price),
+            discountPrice: p.discount_price ? Number(p.discount_price) : null,
+            categoryId: p.category_id,
+            brand: p.brand,
+            isFeatured: p.is_featured,
+            isActive: p.is_active,
+            createdAt: new Date(p.created_at),
+            updatedAt: new Date(p.updated_at),
+            images: (p.images || []).map((img: any) => ({
+              id: img.id,
+              imageUrl: img.image_url,
+              altText: img.alt_text,
+              sortOrder: img.sort_order,
+            })),
+            variants: (p.variants || []).map((v: any) => ({
+              id: v.id,
+              size: v.size,
+              color: v.color,
+              stock: v.stock,
+              sku: v.sku,
+            })),
+            category: p.category,
+            rating: 4.9,
+            reviewsCount: 15,
+          }));
+
+          return {
+            products: mapped,
+            meta: {
+              page,
+              limit,
+              total: sbCount || mapped.length,
+              totalPages: Math.ceil((sbCount || mapped.length) / limit),
+            },
+          };
+        }
+      } catch (err) {
+        // Fallback to local memory store
+      }
     }
 
     // Mock Store implementation
@@ -140,6 +205,51 @@ export class ProductService {
       return product;
     }
 
+    // Try Supabase directly
+    if (supabase) {
+      try {
+        const { data: p, error } = await supabase
+          .from('products')
+          .select('*, images:product_images(*), variants:product_variants(*), category:categories(*)')
+          .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
+          .single();
+
+        if (!error && p) {
+          return {
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            description: p.description,
+            price: Number(p.price),
+            discountPrice: p.discount_price ? Number(p.discount_price) : null,
+            categoryId: p.category_id,
+            brand: p.brand,
+            isFeatured: p.is_featured,
+            isActive: p.is_active,
+            createdAt: new Date(p.created_at),
+            updatedAt: new Date(p.updated_at),
+            images: (p.images || []).map((img: any) => ({
+              id: img.id,
+              imageUrl: img.image_url,
+              altText: img.alt_text,
+              sortOrder: img.sort_order,
+            })),
+            variants: (p.variants || []).map((v: any) => ({
+              id: v.id,
+              size: v.size,
+              color: v.color,
+              stock: v.stock,
+              sku: v.sku,
+            })),
+            category: p.category,
+            reviews: [],
+          };
+        }
+      } catch (err) {
+        // Fallback
+      }
+    }
+
     const product = mockStore.products.find(
       (p) => p.id === idOrSlug || p.slug === idOrSlug
     );
@@ -151,10 +261,54 @@ export class ProductService {
 
   static async createProduct(data: any) {
     const slug = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    const newId = `prod-${Date.now()}`;
+
+    // Persist to Supabase directly if available
+    if (supabase) {
+      try {
+        await supabase.from('products').insert({
+          id: newId,
+          name: data.name,
+          slug,
+          description: data.description,
+          price: data.price,
+          discount_price: data.discountPrice,
+          category_id: data.categoryId,
+          brand: data.brand || 'Vanguard',
+          is_featured: data.isFeatured || false,
+          is_active: true,
+        });
+
+        if (data.images && data.images.length > 0) {
+          const imgInserts = data.images.map((url: string, idx: number) => ({
+            id: `img-${Date.now()}-${idx}`,
+            product_id: newId,
+            image_url: url,
+            sort_order: idx,
+          }));
+          await supabase.from('product_images').insert(imgInserts);
+        }
+
+        if (data.variants && data.variants.length > 0) {
+          const varInserts = data.variants.map((v: any, idx: number) => ({
+            id: `var-${Date.now()}-${idx}`,
+            product_id: newId,
+            size: v.size,
+            color: v.color,
+            stock: v.stock,
+            sku: v.sku || `${slug}-${v.size}-${idx + 1}`.toUpperCase(),
+          }));
+          await supabase.from('product_variants').insert(varInserts);
+        }
+      } catch (err) {
+        console.warn('Supabase createProduct sync notice:', err);
+      }
+    }
 
     if (isDatabaseConnected()) {
       return prisma.product.create({
         data: {
+          id: newId,
           name: data.name,
           slug,
           description: data.description,
@@ -188,7 +342,7 @@ export class ProductService {
 
     const cat = mockStore.categories.find((c) => c.id === data.categoryId);
     const newProduct: MockProduct = {
-      id: `prod-${Date.now()}`,
+      id: newId,
       name: data.name,
       slug,
       description: data.description,
@@ -202,14 +356,14 @@ export class ProductService {
       updatedAt: new Date(),
       images: (data.images || []).map((url: string, idx: number) => ({
         id: `img-${Date.now()}-${idx}`,
-        productId: `prod-${Date.now()}`,
+        productId: newId,
         imageUrl: url,
         sortOrder: idx,
         createdAt: new Date(),
       })),
       variants: (data.variants || []).map((v: any, idx: number) => ({
         id: `var-${Date.now()}-${idx}`,
-        productId: `prod-${Date.now()}`,
+        productId: newId,
         size: v.size,
         color: v.color,
         stock: v.stock,
@@ -227,6 +381,23 @@ export class ProductService {
   }
 
   static async updateProduct(id: string, data: any) {
+    if (supabase) {
+      try {
+        const updatePayload: any = {};
+        if (data.name) updatePayload.name = data.name;
+        if (data.description) updatePayload.description = data.description;
+        if (data.price !== undefined) updatePayload.price = data.price;
+        if (data.discountPrice !== undefined) updatePayload.discount_price = data.discountPrice;
+        if (data.categoryId) updatePayload.category_id = data.categoryId;
+        if (data.brand) updatePayload.brand = data.brand;
+        if (data.isFeatured !== undefined) updatePayload.is_featured = data.isFeatured;
+        if (data.isActive !== undefined) updatePayload.is_active = data.isActive;
+        await supabase.from('products').update(updatePayload).eq('id', id);
+      } catch (err) {
+        console.warn('Supabase updateProduct sync notice:', err);
+      }
+    }
+
     if (isDatabaseConnected()) {
       return prisma.product.update({
         where: { id },
@@ -256,6 +427,14 @@ export class ProductService {
   }
 
   static async deleteProduct(id: string) {
+    if (supabase) {
+      try {
+        await supabase.from('products').delete().eq('id', id);
+      } catch (err) {
+        console.warn('Supabase deleteProduct sync notice:', err);
+      }
+    }
+
     if (isDatabaseConnected()) {
       return prisma.product.delete({ where: { id } });
     }

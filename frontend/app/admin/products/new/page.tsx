@@ -7,6 +7,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
 import { MOCK_CATEGORIES } from '@/lib/mockData';
 import { slugify } from '@/lib/utils';
+import { api } from '@/lib/api';
 import { ArrowLeft, Plus, Trash2, CheckCircle2 } from 'lucide-react';
 
 export default function NewProductPage() {
@@ -14,8 +15,8 @@ export default function NewProductPage() {
 
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
-  const [brand, setBrand] = useState('AURA Atelier');
-  const [categoryId, setCategoryId] = useState('cat-1');
+  const [brand, setBrand] = useState('Vanguard Atelier');
+  const [categoryId, setCategoryId] = useState('cat-tshirts');
   const [price, setPrice] = useState(2499);
   const [discountPrice, setDiscountPrice] = useState(1999);
   const [description, setDescription] = useState('');
@@ -27,6 +28,8 @@ export default function NewProductPage() {
   ]);
 
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleNameChange = (val: string) => {
     setName(val);
@@ -41,12 +44,36 @@ export default function NewProductPage() {
     setVariants(variants.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSuccess(true);
-    setTimeout(() => {
-      router.push('/admin/products');
-    }, 1500);
+    setIsSubmitting(true);
+    setErrorMsg('');
+    try {
+      await api.createProduct({
+        name,
+        slug,
+        description: description || `${brand} ${name} crafted with luxury materials.`,
+        price: Number(price),
+        discountPrice: discountPrice ? Number(discountPrice) : null,
+        categoryId,
+        brand,
+        images: [imageUrl],
+        variants: variants.map((v, i) => ({
+          size: v.size,
+          color: v.color,
+          stock: Number(v.stock),
+          sku: `${slug || 'prod'}-${v.size}-${i + 1}`.toUpperCase(),
+        })),
+      });
+      setIsSuccess(true);
+      setTimeout(() => {
+        router.push('/admin/products');
+      }, 1200);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to create product');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

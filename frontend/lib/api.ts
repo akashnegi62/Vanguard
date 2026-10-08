@@ -323,6 +323,39 @@ class ApiService {
       return { success: true, data: MOCK_USERS };
     }
   }
+
+  async createProduct(data: any): Promise<ApiResponse<Product>> {
+    return this.request('/products', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateProduct(id: string, data: any): Promise<ApiResponse<Product>> {
+    return this.request(`/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteProduct(id: string): Promise<ApiResponse<any>> {
+    return this.request(`/products/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async createCategory(data: any): Promise<ApiResponse<Category>> {
+    return this.request('/categories', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteCategory(id: string): Promise<ApiResponse<any>> {
+    return this.request(`/categories/${id}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const api = new ApiService();
