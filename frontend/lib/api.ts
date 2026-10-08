@@ -1,7 +1,7 @@
 import { ApiResponse, Product, Category, Order, User, Review } from '@/types';
 import { MOCK_PRODUCTS, MOCK_CATEGORIES, MOCK_ORDERS, MOCK_USERS } from './mockData';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
 class ApiService {
   private getToken(): string | null {
