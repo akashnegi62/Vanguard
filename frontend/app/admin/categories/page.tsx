@@ -419,7 +419,7 @@ export default function AdminCategoriesPage() {
 
               {/* Catalog Slug */}
               <div>
-                <label className="text-xs text-slate-700 block mb-1 font-bold uppercase tracking-wider flex items-center justify-between">
+                <label className="text-xs text-slate-700 mb-1 font-bold uppercase tracking-wider flex items-center justify-between">
                   <span>URL Slug *</span>
                   <span className="text-[10px] text-slate-400 font-mono font-normal">/products?category={slug || '...'}</span>
                 </label>

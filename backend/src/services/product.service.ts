@@ -410,24 +410,77 @@ export class ProductService {
     let updatedInSupabase = false;
     let supabaseProduct: any = null;
 
+    const catMap: Record<string, string> = {
+      'cat-1': 'cat-tshirts',
+      'cat-2': 'cat-shirts',
+      'cat-3': 'cat-jeans',
+      'cat-4': 'cat-trousers',
+      'cat-5': 'cat-jackets',
+      'cat-6': 'cat-hoodies',
+      'cat-7': 'cat-shorts',
+    };
+    const resolvedCatId = data.categoryId ? (catMap[data.categoryId] || data.categoryId) : undefined;
+
+    let targetId = id;
+
     if (supabase) {
       try {
+        // Resolve target product ID first (by id or slug)
+        const { data: existingProd } = await supabase
+          .from('products')
+          .select('id, slug')
+          .or(`id.eq.${id},slug.eq.${id}`)
+          .single();
+
+        if (existingProd) {
+          targetId = existingProd.id;
+        }
+
         const updatePayload: any = {};
         if (data.name) updatePayload.name = data.name;
+        if (data.slug) updatePayload.slug = data.slug;
         if (data.description) updatePayload.description = data.description;
-        if (data.price !== undefined) updatePayload.price = data.price;
-        if (data.discountPrice !== undefined) updatePayload.discount_price = data.discountPrice;
-        if (data.categoryId) updatePayload.category_id = data.categoryId;
+        if (data.price !== undefined) updatePayload.price = Number(data.price);
+        if (data.discountPrice !== undefined) updatePayload.discount_price = data.discountPrice ? Number(data.discountPrice) : null;
+        if (resolvedCatId) updatePayload.category_id = resolvedCatId;
         if (data.brand) updatePayload.brand = data.brand;
-        if (data.isFeatured !== undefined) updatePayload.is_featured = data.isFeatured;
-        if (data.isActive !== undefined) updatePayload.is_active = data.isActive;
+        if (data.isFeatured !== undefined) updatePayload.is_featured = Boolean(data.isFeatured);
+        if (data.isActive !== undefined) updatePayload.is_active = Boolean(data.isActive);
+        updatePayload.updated_at = new Date().toISOString();
 
         const { data: updated, error } = await supabase
           .from('products')
           .update(updatePayload)
-          .eq('id', id)
+          .eq('id', targetId)
           .select('*, images:product_images(*), variants:product_variants(*), category:categories(*)')
           .single();
+
+        // Update product images if provided
+        if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+          await supabase.from('product_images').delete().eq('product_id', targetId);
+          const imgInserts = data.images.map((url: string, idx: number) => ({
+            id: `img-${Date.now()}-${idx}`,
+            product_id: targetId,
+            image_url: url,
+            sort_order: idx,
+          }));
+          await supabase.from('product_images').insert(imgInserts);
+        }
+
+        // Update product variants if provided
+        if (data.variants && Array.isArray(data.variants) && data.variants.length > 0) {
+          await supabase.from('product_variants').delete().eq('product_id', targetId);
+          const currentSlug = data.slug || existingProd?.slug || 'prod';
+          const varInserts = data.variants.map((v: any, idx: number) => ({
+            id: `var-${Date.now()}-${idx}`,
+            product_id: targetId,
+            size: v.size,
+            color: v.color,
+            stock: Number(v.stock),
+            sku: v.sku || `${currentSlug}-${v.size}-${idx + 1}`.toUpperCase(),
+          }));
+          await supabase.from('product_variants').insert(varInserts);
+        }
 
         if (!error && updated) {
           updatedInSupabase = true;
@@ -444,19 +497,34 @@ export class ProductService {
             isActive: updated.is_active,
             createdAt: new Date(updated.created_at),
             updatedAt: new Date(updated.updated_at),
-            images: (updated.images || []).map((img: any) => ({
-              id: img.id,
-              imageUrl: img.image_url,
-              altText: img.alt_text,
-              sortOrder: img.sort_order,
-            })),
-            variants: (updated.variants || []).map((v: any) => ({
-              id: v.id,
-              size: v.size,
-              color: v.color,
-              stock: v.stock,
-              sku: v.sku,
-            })),
+            images: data.images
+              ? data.images.map((url: string, idx: number) => ({
+                  id: `img-${Date.now()}-${idx}`,
+                  imageUrl: url,
+                  altText: updated.name,
+                  sortOrder: idx,
+                }))
+              : (updated.images || []).map((img: any) => ({
+                  id: img.id,
+                  imageUrl: img.image_url,
+                  altText: img.alt_text,
+                  sortOrder: img.sort_order,
+                })),
+            variants: data.variants
+              ? data.variants.map((v: any, idx: number) => ({
+                  id: `var-${Date.now()}-${idx}`,
+                  size: v.size,
+                  color: v.color,
+                  stock: Number(v.stock),
+                  sku: v.sku || `${updated.slug}-${v.size}-${idx + 1}`.toUpperCase(),
+                }))
+              : (updated.variants || []).map((v: any) => ({
+                  id: v.id,
+                  size: v.size,
+                  color: v.color,
+                  stock: v.stock,
+                  sku: v.sku,
+                })),
             category: updated.category,
           };
         }
@@ -466,18 +534,43 @@ export class ProductService {
     }
 
     if (isDatabaseConnected()) {
+      const prismaData: any = {
+        ...(data.name && { name: data.name }),
+        ...(data.slug && { slug: data.slug }),
+        ...(data.description && { description: data.description }),
+        ...(data.price !== undefined && { price: Number(data.price) }),
+        ...(data.discountPrice !== undefined && { discountPrice: data.discountPrice ? Number(data.discountPrice) : null }),
+        ...(resolvedCatId && { categoryId: resolvedCatId }),
+        ...(data.brand && { brand: data.brand }),
+        ...(data.isFeatured !== undefined && { isFeatured: Boolean(data.isFeatured) }),
+        ...(data.isActive !== undefined && { isActive: Boolean(data.isActive) }),
+      };
+
+      if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+        await prisma.productImage.deleteMany({ where: { productId: targetId } });
+        prismaData.images = {
+          create: data.images.map((url: string, idx: number) => ({
+            imageUrl: url,
+            sortOrder: idx,
+          })),
+        };
+      }
+
+      if (data.variants && Array.isArray(data.variants) && data.variants.length > 0) {
+        await prisma.productVariant.deleteMany({ where: { productId: targetId } });
+        prismaData.variants = {
+          create: data.variants.map((v: any) => ({
+            size: v.size,
+            color: v.color,
+            stock: Number(v.stock),
+            sku: v.sku,
+          })),
+        };
+      }
+
       return prisma.product.update({
-        where: { id },
-        data: {
-          ...(data.name && { name: data.name }),
-          ...(data.description && { description: data.description }),
-          ...(data.price !== undefined && { price: data.price }),
-          ...(data.discountPrice !== undefined && { discountPrice: data.discountPrice }),
-          ...(data.categoryId && { categoryId: data.categoryId }),
-          ...(data.brand && { brand: data.brand }),
-          ...(data.isFeatured !== undefined && { isFeatured: data.isFeatured }),
-          ...(data.isActive !== undefined && { isActive: data.isActive }),
-        },
+        where: { id: targetId },
+        data: prismaData,
         include: {
           images: true,
           variants: true,
@@ -486,9 +579,43 @@ export class ProductService {
       });
     }
 
-    const product = mockStore.products.find((p) => p.id === id);
+    const product = mockStore.products.find((p) => p.id === id || p.slug === id || p.id === targetId);
     if (product) {
-      Object.assign(product, data, { updatedAt: new Date() });
+      if (data.name) product.name = data.name;
+      if (data.slug) product.slug = data.slug;
+      if (data.description) product.description = data.description;
+      if (data.price !== undefined) product.price = Number(data.price);
+      if (data.discountPrice !== undefined) product.discountPrice = data.discountPrice ? Number(data.discountPrice) : null;
+      if (resolvedCatId) {
+        product.categoryId = resolvedCatId;
+        const cat = mockStore.categories.find((c) => c.id === resolvedCatId);
+        if (cat) product.category = cat;
+      }
+      if (data.brand) product.brand = data.brand;
+      if (data.isFeatured !== undefined) product.isFeatured = Boolean(data.isFeatured);
+      if (data.isActive !== undefined) product.isActive = Boolean(data.isActive);
+      if (data.images && Array.isArray(data.images)) {
+        product.images = data.images.map((url: string, idx: number) => ({
+          id: `img-${Date.now()}-${idx}`,
+          productId: product.id,
+          imageUrl: url,
+          sortOrder: idx,
+          createdAt: new Date(),
+        }));
+      }
+      if (data.variants && Array.isArray(data.variants)) {
+        product.variants = data.variants.map((v: any, idx: number) => ({
+          id: `var-${Date.now()}-${idx}`,
+          productId: product.id,
+          size: v.size,
+          color: v.color,
+          stock: Number(v.stock),
+          sku: v.sku || `${product.slug}-${v.size}-${idx + 1}`.toUpperCase(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }));
+      }
+      product.updatedAt = new Date();
       return product;
     }
 

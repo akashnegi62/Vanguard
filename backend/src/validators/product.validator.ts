@@ -5,10 +5,10 @@ export const createProductSchema = z.object({
   slug: z.string().optional(),
   description: z.string().min(5, 'Description must be at least 5 characters'),
   price: z.number().positive('Price must be greater than zero'),
-  discountPrice: z.number().positive().optional().nullable(),
+  discountPrice: z.number().nonnegative().optional().nullable(),
   categoryId: z.string().min(1, 'Category is required'),
-  brand: z.string().default('Vanguard Atelier'),
-  isFeatured: z.boolean().default(false),
+  brand: z.string().default('Vanguard Atelier').optional(),
+  isFeatured: z.boolean().default(false).optional(),
   isActive: z.boolean().default(true).optional(),
   images: z.array(z.string().min(1)).min(1, 'At least one image is required'),
   variants: z.array(
@@ -22,3 +22,4 @@ export const createProductSchema = z.object({
 });
 
 export const updateProductSchema = createProductSchema.partial();
+
