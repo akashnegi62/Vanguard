@@ -1,10 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { RotateCcw, X } from 'lucide-react';
 import { MOCK_CATEGORIES } from '@/lib/mockData';
+import { Category } from '@/types';
+import { api } from '@/lib/api';
 
 interface ProductFiltersProps {
+  categories?: Category[];
   selectedCategory?: string;
   selectedSize?: string;
   selectedColor?: string;
@@ -38,6 +41,7 @@ const BRANDS = [
 ];
 
 export default function ProductFilters({
+  categories: initialCategories,
   selectedCategory,
   selectedSize,
   selectedColor,
@@ -50,6 +54,30 @@ export default function ProductFilters({
   isMobileOpen = false,
   onCloseMobile,
 }: ProductFiltersProps) {
+  const [categories, setCategories] = useState<Category[]>(initialCategories || MOCK_CATEGORIES);
+
+  useEffect(() => {
+    if (initialCategories && initialCategories.length > 0) {
+      setCategories(initialCategories);
+      return;
+    }
+
+    let isMounted = true;
+    api.getCategories()
+      .then((res) => {
+        if (isMounted && res.data && res.data.length > 0) {
+          setCategories(res.data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to fetch dynamic categories in filters', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [initialCategories]);
+
   const content = (
     <div className="space-y-7 text-xs">
       <div className="flex items-center justify-between pb-3 border-b border-slate-200">
@@ -80,22 +108,31 @@ export default function ProductFilters({
           >
             All Categories
           </button>
-          {MOCK_CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => onFilterChange({ category: cat.slug })}
-              className={`w-full text-left py-1.5 px-2 rounded-lg text-xs transition-colors flex items-center justify-between ${
-                selectedCategory === cat.slug
-                  ? 'bg-slate-900 text-white font-bold'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <span>{cat.name}</span>
-              <span className={`text-[10px] font-mono ${selectedCategory === cat.slug ? 'text-slate-300' : 'text-slate-400'}`}>
-                {cat.productCount}
-              </span>
-            </button>
-          ))}
+          {categories.map((cat) => {
+            const isSelected = selectedCategory === cat.slug || selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => onFilterChange({ category: isSelected ? undefined : cat.slug })}
+                className={`w-full text-left py-1.5 px-2 rounded-lg text-xs transition-colors flex items-center justify-between ${
+                  isSelected
+                    ? 'bg-slate-900 text-white font-bold'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
+                <span>{cat.name}</span>
+                {cat.productCount !== undefined && (
+                  <span
+                    className={`text-[10px] font-mono ${
+                      isSelected ? 'text-slate-300' : 'text-slate-400'
+                    }`}
+                  >
+                    {cat.productCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 

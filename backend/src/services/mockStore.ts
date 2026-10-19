@@ -287,6 +287,16 @@ class MockStore {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
+      {
+        id: 'cat-sneakers',
+        name: 'Sneakers',
+        slug: 'sneakers',
+        description: 'Luxury handcrafted sneakers, minimalist court shoes, and retro athletic trainers.',
+        imageUrl: 'https://m.media-amazon.com/images/I/61S4rKq-VCL._AC_UL640_FMwebp_QL65_.jpg',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ];
 
     // Addresses
@@ -524,6 +534,27 @@ class MockStore {
           { size: 'M', color: 'Vintage Wash', stock: 12, sku: 'SDT-VW-M' },
           { size: 'L', color: 'Vintage Wash', stock: 15, sku: 'SDT-VW-L' },
           { size: 'XL', color: 'Vintage Wash', stock: 10, sku: 'SDT-VW-XL' },
+        ],
+      },
+      {
+        id: 'prod-1792312935553',
+        name: "Campus Men's Avenue Sneakers",
+        slug: 'campus-mens-avenue-sneakers',
+        description: 'Everyday lifestyle luxury sneakers crafted with cushioned footbeds, breathable mesh, and rubber traction soles.',
+        price: 2499,
+        discountPrice: 1999,
+        categoryId: 'cat-sneakers',
+        brand: 'Campus',
+        isFeatured: true,
+        rating: 4.9,
+        reviewsCount: 12,
+        images: [
+          'https://m.media-amazon.com/images/I/61S4rKq-VCL._AC_UL640_FMwebp_QL65_.jpg',
+        ],
+        variants: [
+          { size: '7', color: 'White/Navy', stock: 10, sku: 'SNK-7' },
+          { size: '8', color: 'White/Navy', stock: 15, sku: 'SNK-8' },
+          { size: '9', color: 'White/Navy', stock: 10, sku: 'SNK-9' },
         ],
       },
     ];

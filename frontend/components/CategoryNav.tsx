@@ -1,10 +1,33 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 import { MOCK_CATEGORIES } from '@/lib/mockData';
+import { Category } from '@/types';
+import { api } from '@/lib/api';
 
 export default function CategoryNav() {
+  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
+
+  useEffect(() => {
+    let isMounted = true;
+    api.getCategories()
+      .then((res) => {
+        if (isMounted && res.data && res.data.length > 0) {
+          setCategories(res.data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to fetch categories for CategoryNav', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <section id="categories" className="py-20 bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +50,7 @@ export default function CategoryNav() {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {MOCK_CATEGORIES.map((cat, idx) => (
+          {categories.map((cat, idx) => (
             <Link
               key={cat.id}
               href={`/products?category=${cat.slug}`}
@@ -40,6 +63,7 @@ export default function CategoryNav() {
                   src={cat.imageUrl}
                   alt={cat.name}
                   fill
+                  unoptimized
                   sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                   className="object-cover object-center transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-90"
                 />

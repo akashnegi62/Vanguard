@@ -64,9 +64,45 @@ export const MOCK_CATEGORIES: Category[] = [
     isActive: true,
     productCount: 4,
   },
+  {
+    id: 'cat-sneakers',
+    name: 'Sneakers',
+    slug: 'sneakers',
+    description: 'Luxury handcrafted sneakers, minimalist court shoes, and retro athletic trainers.',
+    imageUrl: 'https://m.media-amazon.com/images/I/61S4rKq-VCL._AC_UL640_FMwebp_QL65_.jpg',
+    isActive: true,
+    productCount: 1,
+  },
 ];
 
 export const MOCK_PRODUCTS: Product[] = [
+  // Sneakers
+  {
+    id: 'prod-1792312935553',
+    name: "Campus Men's Avenue Sneakers",
+    slug: 'campus-mens-avenue-sneakers',
+    description: 'Everyday lifestyle luxury sneakers crafted with cushioned footbeds, breathable mesh, and rubber traction soles.',
+    price: 2499,
+    discountPrice: 1999,
+    categoryId: 'cat-sneakers',
+    brand: 'Campus',
+    isFeatured: true,
+    isActive: true,
+    createdAt: '2026-10-18T08:40:49Z',
+    updatedAt: '2026-10-18T08:40:49Z',
+    avgRating: 4.9,
+    totalReviews: 12,
+    totalStock: 35,
+    images: [
+      { id: 'img-snk-1', imageUrl: 'https://m.media-amazon.com/images/I/61S4rKq-VCL._AC_UL640_FMwebp_QL65_.jpg', sortOrder: 0, altText: "Campus Men's Avenue Sneakers" },
+    ],
+    variants: [
+      { id: 'var-snk-1', productId: 'prod-1792312935553', size: '7', color: 'White/Navy', stock: 10, sku: 'SNK-7' },
+      { id: 'var-snk-2', productId: 'prod-1792312935553', size: '8', color: 'White/Navy', stock: 15, sku: 'SNK-8' },
+      { id: 'var-snk-3', productId: 'prod-1792312935553', size: '9', color: 'White/Navy', stock: 10, sku: 'SNK-9' },
+    ],
+    reviews: [],
+  },
   // T-Shirts
   {
     id: 'prod-1',

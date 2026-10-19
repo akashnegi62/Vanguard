@@ -17,6 +17,7 @@ export default function NewProductPage() {
   const [slug, setSlug] = useState('');
   const [brand, setBrand] = useState('Vanguard Atelier');
   const [categoryId, setCategoryId] = useState('cat-tshirts');
+  const [categories, setCategories] = useState(MOCK_CATEGORIES);
   const [price, setPrice] = useState(2499);
   const [discountPrice, setDiscountPrice] = useState(1999);
   const [description, setDescription] = useState('');
@@ -30,6 +31,19 @@ export default function NewProductPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
+  React.useEffect(() => {
+    api.getCategories()
+      .then((res) => {
+        if (res.data && res.data.length > 0) {
+          setCategories(res.data);
+          if (!res.data.some((c) => c.id === categoryId)) {
+            setCategoryId(res.data[0].id);
+          }
+        }
+      })
+      .catch((err) => console.warn('Failed to load categories', err));
+  }, []);
 
   const handleNameChange = (val: string) => {
     setName(val);
@@ -155,13 +169,11 @@ export default function NewProductPage() {
                     onChange={(e) => setCategoryId(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-slate-900"
                   >
-                    <option value="cat-tshirts">T-Shirts</option>
-                    <option value="cat-shirts">Shirts</option>
-                    <option value="cat-jeans">Jeans</option>
-                    <option value="cat-trousers">Trousers</option>
-                    <option value="cat-jackets">Jackets</option>
-                    <option value="cat-hoodies">Hoodies</option>
-                    <option value="cat-shorts">Shorts</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

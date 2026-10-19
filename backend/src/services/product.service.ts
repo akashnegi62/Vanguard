@@ -75,6 +75,10 @@ export class ProductService {
 
         if (query.search) q = q.ilike('name', `%${query.search}%`);
         if (query.featured === 'true') q = q.eq('is_featured', true);
+        if (query.category) {
+          const catId = query.category.startsWith('cat-') ? query.category : `cat-${query.category}`;
+          q = q.or(`category_id.eq.${query.category},category_id.eq.${catId}`);
+        }
         if (query.minPrice) q = q.gte('price', parseFloat(query.minPrice));
         if (query.maxPrice) q = q.lte('price', parseFloat(query.maxPrice));
         if (query.sort === 'price_asc') q = q.order('price', { ascending: true });
@@ -286,6 +290,9 @@ export class ProductService {
       'cat-5': 'cat-jackets',
       'cat-6': 'cat-hoodies',
       'cat-7': 'cat-shorts',
+      'cat-8': 'cat-sneakers',
+      'cat-sneakers': 'cat-sneakers',
+      'sneakers': 'cat-sneakers',
     };
     const resolvedCatId = catMap[data.categoryId] || data.categoryId;
 
@@ -418,6 +425,9 @@ export class ProductService {
       'cat-5': 'cat-jackets',
       'cat-6': 'cat-hoodies',
       'cat-7': 'cat-shorts',
+      'cat-8': 'cat-sneakers',
+      'cat-sneakers': 'cat-sneakers',
+      'sneakers': 'cat-sneakers',
     };
     const resolvedCatId = data.categoryId ? (catMap[data.categoryId] || data.categoryId) : undefined;
 

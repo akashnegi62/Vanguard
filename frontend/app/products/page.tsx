@@ -8,7 +8,7 @@ import ProductGrid from '@/components/ProductGrid';
 import ProductFilters from '@/components/ProductFilters';
 import ProductSort from '@/components/ProductSort';
 import { api } from '@/lib/api';
-import { Product } from '@/types';
+import { Product, Category } from '@/types';
 import { Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function ProductsContent() {
@@ -16,6 +16,7 @@ function ProductsContent() {
   const router = useRouter();
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -33,6 +34,23 @@ function ProductsContent() {
   const rating = searchParams.get('rating') ? Number(searchParams.get('rating')) : undefined;
   const sort = searchParams.get('sort') || 'newest';
   const page = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
+
+  useEffect(() => {
+    let isMounted = true;
+    api.getCategories()
+      .then((res) => {
+        if (isMounted && res.data && res.data.length > 0) {
+          setCategories(res.data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to fetch categories:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -118,6 +136,7 @@ function ProductsContent() {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Filters Sidebar */}
         <ProductFilters
+          categories={categories}
           selectedCategory={category}
           selectedSize={size}
           selectedColor={color}
