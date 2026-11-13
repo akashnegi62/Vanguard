@@ -1,19 +1,43 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import HeroSection from '@/components/HeroSection';
 import CategoryNav from '@/components/CategoryNav';
 import ProductGrid from '@/components/ProductGrid';
-import { MOCK_PRODUCTS } from '@/lib/mockData';
+import { Product } from '@/types';
+import { api } from '@/lib/api';
 import { ArrowRight, Sparkles, Flame, Clock } from 'lucide-react';
 
 export default function HomePage() {
-  const featuredProducts = MOCK_PRODUCTS.filter((p) => p.isFeatured).slice(0, 4);
-  const newArrivals = [...MOCK_PRODUCTS].reverse().slice(0, 4);
-  const bestSellers = [...MOCK_PRODUCTS]
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    api.getProducts({ limit: 50 })
+      .then((res) => {
+        if (isMounted && res.data) {
+          setProducts(res.data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Failed to fetch products for home page:', err);
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const featuredProducts = products.filter((p) => p.isFeatured).slice(0, 4);
+  const newArrivals = [...products].reverse().slice(0, 4);
+  const bestSellers = [...products]
     .sort((a, b) => (b.totalReviews || 0) - (a.totalReviews || 0))
     .slice(0, 4);
 
@@ -48,7 +72,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <ProductGrid products={featuredProducts} />
+            <ProductGrid products={featuredProducts} isLoading={isLoading} />
           </div>
         </section>
 
@@ -95,7 +119,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <ProductGrid products={newArrivals} />
+            <ProductGrid products={newArrivals} isLoading={isLoading} />
           </div>
         </section>
 
@@ -119,7 +143,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <ProductGrid products={bestSellers} />
+            <ProductGrid products={bestSellers} isLoading={isLoading} />
           </div>
         </section>
       </main>

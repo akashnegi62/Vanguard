@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
-import { MOCK_CATEGORIES } from '@/lib/mockData';
+import { Category } from '@/types';
 import { slugify } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { ArrowLeft, Plus, Trash2, CheckCircle2 } from 'lucide-react';
@@ -17,7 +17,7 @@ export default function NewProductPage() {
   const [slug, setSlug] = useState('');
   const [brand, setBrand] = useState('Vanguard Atelier');
   const [categoryId, setCategoryId] = useState('cat-tshirts');
-  const [categories, setCategories] = useState(MOCK_CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [price, setPrice] = useState(2499);
   const [discountPrice, setDiscountPrice] = useState(1999);
   const [description, setDescription] = useState('');

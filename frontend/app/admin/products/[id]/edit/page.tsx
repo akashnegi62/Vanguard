@@ -5,7 +5,6 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
-import { MOCK_CATEGORIES } from '@/lib/mockData';
 import { slugify } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { Product, Category } from '@/types';
@@ -36,7 +35,7 @@ export default function EditProductPage() {
   const [slug, setSlug] = useState('');
   const [brand, setBrand] = useState('Vanguard Atelier');
   const [categoryId, setCategoryId] = useState('cat-tshirts');
-  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [price, setPrice] = useState<number>(0);
   const [discountPrice, setDiscountPrice] = useState<number | ''>('');
   const [description, setDescription] = useState('');

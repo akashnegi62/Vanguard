@@ -1,5 +1,4 @@
 import { ApiResponse, Product, Category, Order, User, Review } from '@/types';
-import { MOCK_PRODUCTS, MOCK_CATEGORIES, MOCK_ORDERS, MOCK_USERS } from './mockData';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
@@ -41,31 +40,16 @@ class ApiService {
       }
       return data;
     } catch (err: any) {
-      // Backend offline or network error - provide structured fallback where appropriate
       throw err;
     }
   }
 
   // --- Auth ---
   async login(email: string, password: string): Promise<ApiResponse<{ user: User; token: string }>> {
-    try {
-      return await this.request('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      });
-    } catch (err) {
-      // Fallback for demo
-      const user = MOCK_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase());
-      if (user && (password.length >= 6)) {
-        const token = `mock-jwt-token-${user.id}`;
-        return {
-          success: true,
-          message: 'Logged in successfully (Demo Mode)',
-          data: { user, token },
-        };
-      }
-      throw new Error('Invalid email or password. Try user@example.com or admin@example.com with password: password123');
-    }
+    return this.request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
   }
 
   async register(
@@ -76,32 +60,10 @@ class ApiService {
     role?: 'USER' | 'ADMIN',
     adminSecret?: string
   ): Promise<ApiResponse<{ user: User; token: string }>> {
-    try {
-      return await this.request('/auth/register', {
-        method: 'POST',
-        body: JSON.stringify({ name, email, password, phone, role, adminSecret }),
-      });
-    } catch (err: any) {
-      if (err.message && !err.message.includes('fetch')) {
-        throw err;
-      }
-      const newUser: User = {
-        id: `usr-${Date.now()}`,
-        name,
-        email,
-        phone: phone || null,
-        role: role || 'USER',
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      const token = `mock-jwt-token-${newUser.id}`;
-      return {
-        success: true,
-        message: 'Account created successfully',
-        data: { user: newUser, token },
-      };
-    }
+    return this.request('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password, phone, role, adminSecret }),
+    });
   }
 
   async getCurrentUser(): Promise<ApiResponse<User>> {
@@ -119,89 +81,16 @@ class ApiService {
       });
     }
 
-    try {
-      const query = searchParams.toString();
-      return await this.request(`/products${query ? `?${query}` : ''}`);
-    } catch (err) {
-      // Return filtered mock products
-      let list = [...MOCK_PRODUCTS];
-      if (params?.category) {
-        const cat = MOCK_CATEGORIES.find((c) => c.slug === params.category || c.id === params.category);
-        if (cat) list = list.filter((p) => p.categoryId === cat.id);
-      }
-      if (params?.search) {
-        const q = String(params.search).toLowerCase();
-        list = list.filter((p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
-      }
-      if (params?.minPrice) {
-        list = list.filter((p) => (p.discountPrice || p.price) >= Number(params.minPrice));
-      }
-      if (params?.maxPrice) {
-        list = list.filter((p) => (p.discountPrice || p.price) <= Number(params.maxPrice));
-      }
-      if (params?.brand) {
-        list = list.filter((p) => p.brand.toLowerCase() === String(params.brand).toLowerCase());
-      }
-      if (params?.size) {
-        list = list.filter((p) => p.variants.some((v) => v.size.toLowerCase() === String(params.size).toLowerCase()));
-      }
-      if (params?.color) {
-        list = list.filter((p) => p.variants.some((v) => v.color.toLowerCase().includes(String(params.color).toLowerCase())));
-      }
-      if (params?.rating) {
-        list = list.filter((p) => (p.avgRating || 0) >= Number(params.rating));
-      }
-
-      // Sort
-      if (params?.sort === 'price_asc') {
-        list.sort((a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
-      } else if (params?.sort === 'price_desc') {
-        list.sort((a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
-      } else if (params?.sort === 'rating') {
-        list.sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0));
-      } else if (params?.sort === 'best_selling') {
-        list.sort((a, b) => (b.totalReviews || 0) - (a.totalReviews || 0));
-      } else {
-        list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      }
-
-      const page = Number(params?.page) || 1;
-      const limit = Number(params?.limit) || 12;
-      const total = list.length;
-      const totalPages = Math.ceil(total / limit) || 1;
-      const start = (page - 1) * limit;
-      const paginated = list.slice(start, start + limit);
-
-      return {
-        success: true,
-        data: paginated,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages,
-        },
-      };
-    }
+    const query = searchParams.toString();
+    return this.request(`/products${query ? `?${query}` : ''}`);
   }
 
   async getProductBySlug(slug: string): Promise<ApiResponse<Product>> {
     const encoded = encodeURIComponent(slug);
     try {
       return await this.request(`/products/slug/${encoded}`);
-    } catch (err) {
-      try {
-        return await this.request(`/products/${encoded}`);
-      } catch (err2) {
-        const prod = MOCK_PRODUCTS.find((p) => p.slug === slug || p.id === slug);
-        if (prod) {
-          return {
-            success: true,
-            data: prod,
-          };
-        }
-        throw new Error('Product not found');
-      }
+    } catch {
+      return this.request(`/products/${encoded}`);
     }
   }
 
@@ -209,272 +98,79 @@ class ApiService {
     const encoded = encodeURIComponent(id);
     try {
       return await this.request(`/products/${encoded}`);
-    } catch (err) {
-      try {
-        return await this.request(`/products/slug/${encoded}`);
-      } catch (err2) {
-        const prod = MOCK_PRODUCTS.find((p) => p.id === id || p.slug === id);
-        if (prod) {
-          return {
-            success: true,
-            data: prod,
-          };
-        }
-        throw new Error('Product not found');
-      }
+    } catch {
+      return this.request(`/products/slug/${encoded}`);
     }
   }
 
   // --- Categories ---
   async getCategories(): Promise<ApiResponse<Category[]>> {
-    try {
-      return await this.request('/categories');
-    } catch (err) {
-      return {
-        success: true,
-        data: MOCK_CATEGORIES,
-      };
-    }
+    return this.request('/categories');
   }
 
   // --- Orders ---
   async createOrder(orderData: any): Promise<ApiResponse<Order>> {
-    try {
-      return await this.request('/orders', {
-        method: 'POST',
-        body: JSON.stringify(orderData),
-      });
-    } catch (err) {
-      const newOrder: Order = {
-        id: `ord-${Date.now().toString().slice(-4)}`,
-        userId: orderData.userId || 'usr-1',
-        totalAmount: orderData.totalAmount,
-        shippingAmount: orderData.shippingAmount || 0,
-        discountAmount: orderData.discountAmount || 0,
-        paymentMethod: orderData.paymentMethod || 'Cash on Delivery',
-        paymentStatus: orderData.paymentMethod === 'Test Payment' ? 'PAID' : 'PENDING',
-        orderStatus: 'PENDING',
-        shippingAddress: orderData.shippingAddress,
-        items: orderData.items,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      return {
-        success: true,
-        message: 'Order placed successfully',
-        data: newOrder,
-      };
-    }
+    return this.request('/orders', {
+      method: 'POST',
+      body: JSON.stringify(orderData),
+    });
   }
 
   async getMyOrders(): Promise<ApiResponse<Order[]>> {
-    try {
-      return await this.request('/orders');
-    } catch (err) {
-      return {
-        success: true,
-        data: MOCK_ORDERS,
-      };
-    }
+    return this.request('/orders');
   }
 
   async getOrderById(id: string): Promise<ApiResponse<Order>> {
-    try {
-      return await this.request(`/orders/${id}`);
-    } catch (err) {
-      const ord = MOCK_ORDERS.find((o) => o.id === id);
-      if (ord) return { success: true, data: ord };
-      throw new Error('Order not found');
-    }
+    return this.request(`/orders/${id}`);
   }
 
   // --- Reviews ---
   async addReview(productId: string, rating: number, comment: string): Promise<ApiResponse<Review>> {
-    try {
-      return await this.request(`/products/${productId}/reviews`, {
-        method: 'POST',
-        body: JSON.stringify({ rating, comment }),
-      });
-    } catch (err) {
-      const rev: Review = {
-        id: `rev-${Date.now()}`,
-        userId: 'usr-1',
-        productId,
-        rating,
-        comment,
-        createdAt: new Date().toISOString(),
-        user: { id: 'usr-1', name: 'You', email: 'user@example.com' },
-      };
-      return { success: true, message: 'Review submitted', data: rev };
-    }
+    return this.request(`/products/${productId}/reviews`, {
+      method: 'POST',
+      body: JSON.stringify({ rating, comment }),
+    });
   }
 
   // --- Admin ---
   async getAdminDashboard(): Promise<ApiResponse<any>> {
-    try {
-      return await this.request('/admin/dashboard');
-    } catch (err) {
-      return {
-        success: true,
-        data: {
-          totalUsers: MOCK_USERS.length + 15,
-          totalProducts: MOCK_PRODUCTS.length,
-          totalOrders: MOCK_ORDERS.length + 28,
-          totalRevenue: 284500,
-          pendingOrders: 4,
-          deliveredOrders: 26,
-          recentOrders: MOCK_ORDERS,
-          recentUsers: MOCK_USERS,
-        },
-      };
-    }
+    return this.request('/admin/dashboard');
   }
 
   async getAdminOrders(): Promise<ApiResponse<Order[]>> {
-    try {
-      return await this.request('/admin/orders');
-    } catch (err) {
-      return { success: true, data: MOCK_ORDERS };
-    }
+    return this.request('/admin/orders');
   }
 
   async updateOrderStatus(id: string, status: string): Promise<ApiResponse<any>> {
-    try {
-      return await this.request(`/admin/orders/${id}/status`, {
-        method: 'PUT',
-        body: JSON.stringify({ status }),
-      });
-    } catch (err) {
-      return { success: true, message: 'Order status updated', data: { id, status } };
-    }
+    return this.request(`/admin/orders/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
   }
 
   async updatePaymentStatus(id: string, status: string): Promise<ApiResponse<any>> {
-    try {
-      return await this.request(`/admin/orders/${id}/payment-status`, {
-        method: 'PUT',
-        body: JSON.stringify({ status }),
-      });
-    } catch (err) {
-      return { success: true, message: 'Payment status updated', data: { id, status } };
-    }
+    return this.request(`/admin/orders/${id}/payment-status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
   }
 
   async getAdminUsers(): Promise<ApiResponse<User[]>> {
-    try {
-      return await this.request('/admin/users');
-    } catch (err) {
-      return { success: true, data: MOCK_USERS };
-    }
+    return this.request('/admin/users');
   }
 
   async createProduct(data: any): Promise<ApiResponse<Product>> {
-    try {
-      const res = await this.request<Product>('/products', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
-      if (res.data) {
-        MOCK_PRODUCTS.unshift(res.data);
-      }
-      return res;
-    } catch (err: any) {
-      if (err.message && !err.message.includes('fetch') && !err.message.includes('NetworkError') && !err.message.includes('Failed to fetch')) {
-        throw err;
-      }
-      // Demo fallback in case network error occurs
-      const newProd: Product = {
-        id: `prod-${Date.now()}`,
-        name: data.name,
-        slug: data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        description: data.description || '',
-        price: Number(data.price),
-        discountPrice: data.discountPrice ? Number(data.discountPrice) : null,
-        categoryId: data.categoryId,
-        brand: data.brand || 'Vanguard Atelier',
-        isFeatured: Boolean(data.isFeatured),
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        images: (data.images || []).map((url: string, i: number) => ({
-          id: `img-${Date.now()}-${i}`,
-          imageUrl: url,
-          altText: data.name,
-          sortOrder: i,
-        })),
-        variants: (data.variants || []).map((v: any, i: number) => ({
-          id: `var-${Date.now()}-${i}`,
-          size: v.size,
-          color: v.color,
-          stock: Number(v.stock),
-          sku: v.sku || `${data.slug || 'prod'}-${v.size}-${i + 1}`.toUpperCase(),
-        })),
-        avgRating: 5.0,
-        totalReviews: 0,
-      };
-      MOCK_PRODUCTS.unshift(newProd);
-      return {
-        success: true,
-        message: 'Product created successfully',
-        data: newProd,
-      };
-    }
+    return this.request<Product>('/products', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   async updateProduct(id: string, data: any): Promise<ApiResponse<Product>> {
-    try {
-      const res = await this.request<Product>(`/products/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
-      if (res.data) {
-        const idx = MOCK_PRODUCTS.findIndex((p) => p.id === id || p.slug === id);
-        if (idx !== -1) {
-          MOCK_PRODUCTS[idx] = { ...MOCK_PRODUCTS[idx], ...res.data };
-        }
-      }
-      return res;
-    } catch (err: any) {
-      if (err.message && !err.message.includes('fetch') && !err.message.includes('NetworkError') && !err.message.includes('Failed to fetch')) {
-        throw err;
-      }
-      // Demo fallback in case network error occurs
-      const idx = MOCK_PRODUCTS.findIndex((p) => p.id === id || p.slug === id);
-      if (idx !== -1) {
-        const existing = MOCK_PRODUCTS[idx];
-        const updated: Product = {
-          ...existing,
-          ...data,
-          price: data.price !== undefined ? Number(data.price) : existing.price,
-          discountPrice: data.discountPrice !== undefined ? (data.discountPrice ? Number(data.discountPrice) : null) : existing.discountPrice,
-          images: data.images && Array.isArray(data.images)
-            ? data.images.map((url: string, i: number) => ({
-                id: `img-${Date.now()}-${i}`,
-                imageUrl: url,
-                altText: data.name || existing.name,
-                sortOrder: i,
-              }))
-            : existing.images,
-          variants: data.variants && Array.isArray(data.variants)
-            ? data.variants.map((v: any, i: number) => ({
-                id: `var-${Date.now()}-${i}`,
-                size: v.size,
-                color: v.color,
-                stock: Number(v.stock),
-                sku: v.sku || `${(data.slug || existing.slug)}-${v.size}-${i + 1}`.toUpperCase(),
-              }))
-            : existing.variants,
-          updatedAt: new Date().toISOString(),
-        };
-        MOCK_PRODUCTS[idx] = updated;
-        return {
-          success: true,
-          message: 'Product updated successfully',
-          data: updated,
-        };
-      }
-      throw err;
-    }
+    return this.request<Product>(`/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   }
 
   async deleteProduct(id: string): Promise<ApiResponse<any>> {
@@ -484,25 +180,17 @@ class ApiService {
   }
 
   async updateUserStatus(id: string, isActive: boolean): Promise<ApiResponse<any>> {
-    try {
-      return await this.request(`/admin/users/${id}/status`, {
-        method: 'PUT',
-        body: JSON.stringify({ isActive }),
-      });
-    } catch (err) {
-      return { success: true, message: 'User status updated', data: { id, isActive } };
-    }
+    return this.request(`/admin/users/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ isActive }),
+    });
   }
 
   async updateUserRole(id: string, role: string): Promise<ApiResponse<any>> {
-    try {
-      return await this.request(`/admin/users/${id}/role`, {
-        method: 'PUT',
-        body: JSON.stringify({ role }),
-      });
-    } catch (err) {
-      return { success: true, message: 'User role updated', data: { id, role } };
-    }
+    return this.request(`/admin/users/${id}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role }),
+    });
   }
 
   async createCategory(data: any): Promise<ApiResponse<Category>> {

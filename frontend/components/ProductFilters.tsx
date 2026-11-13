@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { RotateCcw, X } from 'lucide-react';
-import { MOCK_CATEGORIES } from '@/lib/mockData';
 import { Category } from '@/types';
 import { api } from '@/lib/api';
 
@@ -54,7 +53,7 @@ export default function ProductFilters({
   isMobileOpen = false,
   onCloseMobile,
 }: ProductFiltersProps) {
-  const [categories, setCategories] = useState<Category[]>(initialCategories || MOCK_CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>(initialCategories || []);
 
   useEffect(() => {
     if (initialCategories && initialCategories.length > 0) {

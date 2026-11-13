@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { User } from '@/types';
 import { api } from '@/lib/api';
-import { MOCK_USERS } from '@/lib/mockData';
 
 interface AuthState {
   user: User | null;
@@ -88,7 +87,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   quickLoginAsUser: () => {
-    const demoUser = MOCK_USERS[1]; // Vikram Mehta
+    const demoUser: User = {
+      id: 'usr-1',
+      name: 'Vikram Mehta',
+      email: 'user@example.com',
+      phone: '+91 9811223344',
+      role: 'USER',
+      isActive: true,
+      createdAt: '2026-01-05T00:00:00Z',
+      updatedAt: '2026-01-05T00:00:00Z',
+    };
     const token = `mock-token-${demoUser.id}`;
     localStorage.setItem('mens_store_token', token);
     localStorage.setItem('mens_store_user', JSON.stringify(demoUser));
@@ -96,7 +104,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   quickLoginAsAdmin: () => {
-    const adminUser = MOCK_USERS[0]; // Akash Admin
+    const adminUser: User = {
+      id: 'usr-admin',
+      name: 'Akash Admin',
+      email: 'admin@example.com',
+      phone: '+91 9876543210',
+      role: 'ADMIN',
+      isActive: true,
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:00Z',
+    };
     const token = `mock-token-${adminUser.id}`;
     localStorage.setItem('mens_store_token', token);
     localStorage.setItem('mens_store_user', JSON.stringify(adminUser));
